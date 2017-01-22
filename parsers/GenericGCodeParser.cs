@@ -6,10 +6,10 @@ using System.IO;
 
 namespace gs
 {
-    class GenericGCodeParser
+    public class GenericGCodeParser
     {
 
-        public void Parse(TextReader input)
+        public GCodeFile Parse(TextReader input)
         {
             GCodeFile file = new GCodeFile();
 
@@ -18,15 +18,16 @@ namespace gs
                 string line = input.ReadLine();
                 int nLineNum = lines++;
 
-                GCodeFile.Line l = ParseLine(line, nLineNum);
+                GCodeLine l = ParseLine(line, nLineNum);
                 file.AppendLine(l);
             }
 
+            return file;
         }
 
 
 
-        public GCodeFile.Line ParseLine(string line, int nLineNum)
+        virtual protected GCodeLine ParseLine(string line, int nLineNum)
         {
             if (line.Length == 0)
                 return make_blank(nLineNum);
@@ -55,22 +56,22 @@ namespace gs
 
         
         // N### lines
-        public GCodeFile.Line make_code_line(string line, string[] tokens, int nLineNum)
+        virtual protected GCodeLine make_code_line(string line, string[] tokens, int nLineNum)
         {
-            GCodeFile.LineType eType = GCodeFile.LineType.UnknownCode;
+            GCodeLine.LType eType = GCodeLine.LType.UnknownCode;
             if (tokens[1][0] == 'G')
-                eType = GCodeFile.LineType.GCode;
+                eType = GCodeLine.LType.GCode;
             else if (tokens[1][0] == 'M')
-                eType = GCodeFile.LineType.MCode;
+                eType = GCodeLine.LType.MCode;
 
-            GCodeFile.Line l = new GCodeFile.Line(nLineNum, eType);
+            GCodeLine l = new GCodeLine(nLineNum, eType);
             l.orig_string = line;
 
             l.N = int.Parse(tokens[0].Substring(1));
 
             // [TODO] comments
 
-            if (eType == GCodeFile.LineType.UnknownCode) {
+            if (eType == GCodeLine.LType.UnknownCode) {
                 if (tokens.Length > 1)
                     l.parameters = parse_parameters(tokens, 1);
             } else {
@@ -88,9 +89,9 @@ namespace gs
 
 
         // any line we can't understand
-        public GCodeFile.Line make_string_line(string line, int nLineNum)
+        virtual protected GCodeLine make_string_line(string line, int nLineNum)
         {
-            GCodeFile.Line l = new GCodeFile.Line(nLineNum, GCodeFile.LineType.UnknownString);
+            GCodeLine l = new GCodeLine(nLineNum, GCodeLine.LType.UnknownString);
             l.orig_string = line;
             return l;
         }
@@ -98,19 +99,19 @@ namespace gs
 
 
         // :IF, :ENDIF, :ELSE
-        public GCodeFile.Line make_control_line(string line, string[] tokens, int nLineNum)
+        virtual protected GCodeLine make_control_line(string line, string[] tokens, int nLineNum)
         {
             // figure out command type
             string command = tokens[0].Substring(1);
-            GCodeFile.LineType eType = GCodeFile.LineType.UnknownControl;
+            GCodeLine.LType eType = GCodeLine.LType.UnknownControl;
             if (command.Equals("if", StringComparison.OrdinalIgnoreCase))
-                eType = GCodeFile.LineType.If;
+                eType = GCodeLine.LType.If;
             else if (command.Equals("else", StringComparison.OrdinalIgnoreCase))
-                eType = GCodeFile.LineType.Else;
+                eType = GCodeLine.LType.Else;
             else if (command.Equals("endif", StringComparison.OrdinalIgnoreCase))
-                eType = GCodeFile.LineType.EndIf;
+                eType = GCodeLine.LType.EndIf;
 
-            GCodeFile.Line l = new GCodeFile.Line(nLineNum, eType);
+            GCodeLine l = new GCodeLine(nLineNum, eType);
             l.orig_string = line;
 
             if (tokens.Length > 1)
@@ -122,9 +123,9 @@ namespace gs
 
 
         // line starting with ;
-        public GCodeFile.Line make_comment(string line, int nLineNum)
+        virtual protected GCodeLine make_comment(string line, int nLineNum)
         {
-            GCodeFile.Line l = new GCodeFile.Line(nLineNum, GCodeFile.LineType.Comment);
+            GCodeLine l = new GCodeLine(nLineNum, GCodeLine.LType.Comment);
 
             l.orig_string = line;
             int iStart = line.IndexOf(';');
@@ -134,9 +135,9 @@ namespace gs
 
 
         // line with no text at all
-        public GCodeFile.Line make_blank(int nLineNum)
+        virtual protected GCodeLine make_blank(int nLineNum)
         {
-            return new GCodeFile.Line(nLineNum, GCodeFile.LineType.Blank);
+            return new GCodeLine(nLineNum, GCodeLine.LType.Blank);
         }
 
 
@@ -145,15 +146,16 @@ namespace gs
 
 
 
-        public GCodeFile.Parameter[] parse_parameters(string[] tokens, int iStart, int iEnd = -1)
+        virtual protected GCodeParam[] parse_parameters(string[] tokens, int iStart, int iEnd = -1)
         {
             if (iEnd == -1)
                 iEnd = tokens.Length;
 
             int N = iEnd - iStart;
-            GCodeFile.Parameter[] paramList = new GCodeFile.Parameter[N];
+            GCodeParam[] paramList = new GCodeParam[N];
 
-            for ( int i = iStart; i < iEnd; ++i ) {
+            for ( int ii = iStart; ii < iEnd; ++ii ) {
+                int i = ii - iStart;
                 if ( tokens[i].Contains('=') ) {
                     parse_value_parameter(tokens[i], ref paramList[i]);
 
@@ -161,7 +163,7 @@ namespace gs
                     parse_code_parameter(tokens[i], ref paramList[i]);
 
                 } else {
-                    paramList[i].type = GCodeFile.ParamType.Unknown;
+                    paramList[i].type = GCodeParam.PType.Unknown;
                     paramList[i].identifier = tokens[i];
                 }
             }
@@ -171,14 +173,14 @@ namespace gs
 
 
 
-        public bool parse_code_parameter(string token, ref GCodeFile.Parameter param)
+        virtual protected bool parse_code_parameter(string token, ref GCodeParam param)
         {
-            param.type = GCodeFile.ParamType.Code;
+            param.type = GCodeParam.PType.Code;
             param.identifier = token;
 
             string value = token.Substring(1);
-            GCodeParseUtil.NumberType numType = GCodeParseUtil.GetNumberType(value);
-            if (numType == GCodeParseUtil.NumberType.Integer)
+            GCodeUtil.NumberType numType = GCodeUtil.GetNumberType(value);
+            if (numType == GCodeUtil.NumberType.Integer)
                 param.intValue = int.Parse(value);
 
             return true;
@@ -186,23 +188,23 @@ namespace gs
 
 
 
-        public bool parse_value_parameter(string token, ref GCodeFile.Parameter param)
+        virtual protected bool parse_value_parameter(string token, ref GCodeParam param)
         {
             int i = token.IndexOf('=');
 
             param.identifier = token.Substring(0, i);
 
-            string value = token.Substring(i + 1, token.Length - i);
+            string value = token.Substring(i + 1, token.Length - (i+1));
 
             try {
 
-                GCodeParseUtil.NumberType numType = GCodeParseUtil.GetNumberType(value);
-                if (numType == GCodeParseUtil.NumberType.Decimal) {
-                    param.type = GCodeFile.ParamType.DoubleValue;
+                GCodeUtil.NumberType numType = GCodeUtil.GetNumberType(value);
+                if (numType == GCodeUtil.NumberType.Decimal) {
+                    param.type = GCodeParam.PType.DoubleValue;
                     param.doubleValue = double.Parse(value);
                     return true;
-                } else if (numType == GCodeParseUtil.NumberType.Integer) {
-                    param.type = GCodeFile.ParamType.IntegerValue;
+                } else if (numType == GCodeUtil.NumberType.Integer) {
+                    param.type = GCodeParam.PType.IntegerValue;
                     param.intValue = int.Parse(value);
                     return true;
                 }
@@ -210,7 +212,7 @@ namespace gs
                 // just continue on and do generic string param
             }
 
-            param.type = GCodeFile.ParamType.TextValue;
+            param.type = GCodeParam.PType.TextValue;
             param.textValue = value;
             return true;
         }

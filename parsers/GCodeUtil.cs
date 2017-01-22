@@ -6,8 +6,39 @@ using System.Threading.Tasks;
 
 namespace gs
 {
-    static public class GCodeParseUtil
+
+    static public class GCodeUtil
     {
+
+
+
+        // returns index of param, or -1
+        static public int TryFindParam(GCodeParam[] paramList, string identifier )
+        {
+            for (int i = 0; i < paramList.Length; ++i)
+                if (paramList[i].identifier == identifier)
+                    return i;
+            return -1;
+        }
+
+        static public bool TryFindParamNum(GCodeParam[] paramList, string identifier, ref double d)
+        {
+            for (int i = 0; i < paramList.Length; ++i) {
+                if (paramList[i].identifier == identifier) {
+                    if (paramList[i].type == GCodeParam.PType.DoubleValue) {
+                        d = paramList[i].doubleValue;
+                        return true;
+                    } else if (paramList[i].type == GCodeParam.PType.IntegerValue) {
+                        d = paramList[i].intValue;
+                        return true;
+                    } else
+                        return false;
+                }
+            }
+            return false;
+        }
+
+
 
         public enum NumberType
         {

@@ -7,7 +7,7 @@
     <ProjectGuid>{25DE77C9-14A4-4562-9A24-0BF1E612D9A9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>gsGCode</RootNamespace>
+    <RootNamespace>gs</RootNamespace>
     <AssemblyName>gsGCode</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -41,9 +41,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GCodeFile.cs" />
-    <Compile Include="parsers\GCodeParseUtil.cs" />
+    <Compile Include="geometry\GCodeToPlanarComplex.cs" />
+    <Compile Include="interpreters\BiesseInterpreter.cs" />
+    <Compile Include="interpreters\GCodeInterpreter.cs" />
+    <Compile Include="parsers\GCodeUtil.cs" />
     <Compile Include="parsers\GenericGCodeParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\geometry3Sharp\geometry3Sharp.csproj">
+      <Project>{0c518dda-28fe-44ca-9ab0-f9773974f13a}</Project>
+      <Name>geometry3Sharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
