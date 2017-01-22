@@ -154,17 +154,17 @@ namespace gs
             int N = iEnd - iStart;
             GCodeParam[] paramList = new GCodeParam[N];
 
-            for ( int ii = iStart; ii < iEnd; ++ii ) {
-                int i = ii - iStart;
-                if ( tokens[i].Contains('=') ) {
-                    parse_value_parameter(tokens[i], ref paramList[i]);
+            for ( int ti = iStart; ti < iEnd; ++ti ) {
+                int pi = ti - iStart;
+                if ( tokens[ti].Contains('=') ) {
+                    parse_value_parameter(tokens[ti], ref paramList[pi]);
 
-                } else if ( tokens[i][0] == 'G' || tokens[i][0] == 'M' ) {
-                    parse_code_parameter(tokens[i], ref paramList[i]);
+                } else if ( tokens[ti][0] == 'G' || tokens[ti][0] == 'M' ) {
+                    parse_code_parameter(tokens[ti], ref paramList[pi]);
 
                 } else {
-                    paramList[i].type = GCodeParam.PType.Unknown;
-                    paramList[i].identifier = tokens[i];
+                    paramList[pi].type = GCodeParam.PType.Unknown;
+                    paramList[pi].identifier = tokens[ti];
                 }
             }
 
