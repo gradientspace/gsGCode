@@ -87,14 +87,20 @@ namespace gs
 		}
 
 		void emit_arc(GCodeLine line, bool clockwise) {
+
 			double dx = 0, dy = 0;
+
+            // either of these might be missing...
 			bool brelx = GCodeUtil.TryFindParamNum(line.parameters, "XI", ref dx);
 			bool brely = GCodeUtil.TryFindParamNum(line.parameters, "YI", ref dy);	
 
 			double r = 0;
 			bool br = GCodeUtil.TryFindParamNum(line.parameters, "R", ref r);
 
-			System.Diagnostics.Debug.Assert(brelx && brely && br);
+            // [RMS] seems like G5 always has negative radius and G4 positive ??
+            //   (this will tell us)
+            Debug.Assert((clockwise && r < 0) || (clockwise == false && r > 0));
+            r = Math.Abs(r);
 
 			listener.ArcToRelative( new Vector2d(dx,dy), r, clockwise );			
 		}

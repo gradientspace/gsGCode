@@ -42,7 +42,7 @@ namespace gs
 
 			double dist2 = p1.DistanceSquared(p2);
 			double diam2 = 4 * radius * radius;
-			Debug.Assert(diam2 < dist2 );	// otherwise solution is impossible
+			Debug.Assert(diam2 > dist2);	// otherwise solution is impossible
 
 			Vector2d midpoint = 0.5 * (p1 + p2);
 			if ( MathUtil.EpsilonEqual(dist2, diam2, MathUtil.ZeroTolerance) ) {
@@ -80,23 +80,30 @@ namespace gs
 			Vector2d c0,c1;
 			int nCenters = find_arc_centers(P, P2, radius, out c0, out c1);
 
+            bool b0Left = MathUtil.IsLeft(P, P2, c0) > 0;
+            bool b1Left = MathUtil.IsLeft(P, P2, c1) > 0;
+
 			Vector2d c = c0;
 			if (nCenters == 2 && clockwise == false )
 				c = c1;
 
-			bool reverse = false;
+            // [RMS] what does negative radius mean ?? 
+			//bool reverse = false;
 			//if (radius < 0)
 			//	reverse = true;
 			radius = Math.Abs(radius);
 
 			double start_angle = arc_angle_deg(P, c);
 			double end_angle = arc_angle_deg(P2, c);
+            if ( clockwise == false ) {
+                double tmp = start_angle; start_angle = end_angle; end_angle = tmp;
+            }
 
 
 			Arc2d arc = new Arc2d(c, radius, start_angle, end_angle);
-			if ( clockwise == false )
-				arc.Reverse();
-			Complex.Add(arc);
+            //if (reverse)
+            //    arc.Reverse();
+            Complex.Add(arc);
 
 			P = P2;
         }
