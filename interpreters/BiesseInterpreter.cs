@@ -39,9 +39,7 @@ namespace gs
                     Action<GCodeLine> parseF;
                     if (GCodeMap.TryGetValue(line.code, out parseF))
                         parseF(line);
-
                 }
-
 
             }
         }
@@ -58,13 +56,25 @@ namespace gs
             Debug.Assert(line.code == 1);
 
             double dx = 0, dy = 0;
-            GCodeUtil.TryFindParamNum(line.parameters, "XI", ref dx);
-            GCodeUtil.TryFindParamNum(line.parameters, "YI", ref dy);
+            bool brelx = GCodeUtil.TryFindParamNum(line.parameters, "XI", ref dx);
+            bool brely = GCodeUtil.TryFindParamNum(line.parameters, "YI", ref dy);
 
-            // todo abs coords
+            if (brelx || brely) {
+                listener.LinearMoveToRelative(new Vector2d(dx, dy));
+                return;
+            }
 
+            double x = 0, y = 0;
+            bool absx = GCodeUtil.TryFindParamNum(line.parameters, "X", ref x);
+            bool absy = GCodeUtil.TryFindParamNum(line.parameters, "Y", ref y);
+            if ( absx && absy ) {
+                listener.LinearMoveToAbsolute(new Vector2d(x, y));
+                return;
+            }
 
-            listener.LinearMoveToRelative(new Vector2d(dx, dy));
+            // [RMS] can we have this??
+            if (absx || absy)
+                System.Diagnostics.Debug.Assert(false);
         }
 
 
