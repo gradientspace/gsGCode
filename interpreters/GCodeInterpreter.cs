@@ -31,7 +31,7 @@ namespace gs
 
         void LinearMoveToAbsolute(Vector2d v);
         void LinearMoveToRelative(Vector2d v);
-        void LinearArcTo(Vector2d pos, double radius);
+		void ArcToRelative(Vector2d pos, double radius, bool clockwise);
     }
 
 }

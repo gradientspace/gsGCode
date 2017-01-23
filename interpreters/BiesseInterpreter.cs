@@ -79,7 +79,25 @@ namespace gs
 
 
 
+		void emit_cw_arc(GCodeLine line) {
+			emit_arc(line, true);
+		}
+		void emit_ccw_arc(GCodeLine line) {
+			emit_arc(line, false);
+		}
 
+		void emit_arc(GCodeLine line, bool clockwise) {
+			double dx = 0, dy = 0;
+			bool brelx = GCodeUtil.TryFindParamNum(line.parameters, "XI", ref dx);
+			bool brely = GCodeUtil.TryFindParamNum(line.parameters, "YI", ref dy);	
+
+			double r = 0;
+			bool br = GCodeUtil.TryFindParamNum(line.parameters, "R", ref r);
+
+			System.Diagnostics.Debug.Assert(brelx && brely && br);
+
+			listener.ArcToRelative( new Vector2d(dx,dy), r, clockwise );			
+		}
 
 
         void build_maps()
@@ -87,6 +105,10 @@ namespace gs
 
             // G1 = linear move
             GCodeMap[1] = emit_linear;
+
+			// G4 = CCW circular
+			GCodeMap[4] = emit_ccw_arc;
+			GCodeMap[5] = emit_cw_arc;
         }
 
     }

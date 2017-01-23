@@ -156,13 +156,23 @@ namespace gs
 
             for ( int ti = iStart; ti < iEnd; ++ti ) {
                 int pi = ti - iStart;
+
+				bool bHandled = false;
                 if ( tokens[ti].Contains('=') ) {
-                    parse_value_parameter(tokens[ti], ref paramList[pi]);
+					parse_equals_parameter(tokens[ti], ref paramList[pi]);
+					bHandled = true;
 
-                } else if ( tokens[ti][0] == 'G' || tokens[ti][0] == 'M' ) {
+				} else if ( tokens[ti][0] == 'G' || tokens[ti][0] == 'M' ) {
                     parse_code_parameter(tokens[ti], ref paramList[pi]);
+					bHandled = true;
 
-                } else {
+				} else if ( is_num_parameter(tokens[ti]) > 0 ) {
+					parse_noequals_num_parameter( tokens[ti], ref paramList[pi] );
+					bHandled = true;
+
+                } 
+
+				if (!bHandled) {
                     paramList[pi].type = GCodeParam.PType.Unknown;
                     paramList[pi].identifier = tokens[ti];
                 }
@@ -173,10 +183,11 @@ namespace gs
 
 
 
+
         virtual protected bool parse_code_parameter(string token, ref GCodeParam param)
         {
             param.type = GCodeParam.PType.Code;
-            param.identifier = token;
+			param.identifier = token.Substring(0,1);
 
             string value = token.Substring(1);
             GCodeUtil.NumberType numType = GCodeUtil.GetNumberType(value);
@@ -187,36 +198,61 @@ namespace gs
         }
 
 
+		virtual protected int is_num_parameter(string token) 
+		{
+			int N = token.Length;
+			for ( int i = 1; i < N-1; ++i ) {
+				string sub = token.Substring(i);
+				if ( GCodeUtil.GetNumberType(sub) != GCodeUtil.NumberType.NotANumber )
+					return i;
+			}
+			return -1;
+		}
 
-        virtual protected bool parse_value_parameter(string token, ref GCodeParam param)
+
+		virtual protected bool parse_noequals_num_parameter(string token, ref GCodeParam param)
+		{
+			int i = is_num_parameter(token);
+			if ( i >= 0 )
+				return parse_value_param(token, i, 0, ref param);
+			return false;
+		}
+
+
+
+        virtual protected bool parse_equals_parameter(string token, ref GCodeParam param)
         {
             int i = token.IndexOf('=');
-
-            param.identifier = token.Substring(0, i);
-
-            string value = token.Substring(i + 1, token.Length - (i+1));
-
-            try {
-
-                GCodeUtil.NumberType numType = GCodeUtil.GetNumberType(value);
-                if (numType == GCodeUtil.NumberType.Decimal) {
-                    param.type = GCodeParam.PType.DoubleValue;
-                    param.doubleValue = double.Parse(value);
-                    return true;
-                } else if (numType == GCodeUtil.NumberType.Integer) {
-                    param.type = GCodeParam.PType.IntegerValue;
-                    param.intValue = int.Parse(value);
-                    return true;
-                }
-            } catch {
-                // just continue on and do generic string param
-            }
-
-            param.type = GCodeParam.PType.TextValue;
-            param.textValue = value;
-            return true;
+			return parse_value_param(token, i, 1, ref param);
         }
 
+
+
+		virtual protected bool parse_value_param(string token, int split, int skip, ref GCodeParam param)
+		{
+			param.identifier = token.Substring(0, split);
+
+			string value = token.Substring(split + skip, token.Length - (split+skip));
+
+			try {
+				GCodeUtil.NumberType numType = GCodeUtil.GetNumberType(value);
+				if (numType == GCodeUtil.NumberType.Decimal) {
+					param.type = GCodeParam.PType.DoubleValue;
+					param.doubleValue = double.Parse(value);
+					return true;
+				} else if (numType == GCodeUtil.NumberType.Integer) {
+					param.type = GCodeParam.PType.IntegerValue;
+					param.intValue = int.Parse(value);
+					return true;
+				}
+			} catch {
+				// just continue on and do generic string param
+			}
+
+			param.type = GCodeParam.PType.TextValue;
+			param.textValue = value;	
+			return true;
+		}
 
 
     }
