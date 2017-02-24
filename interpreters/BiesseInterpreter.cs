@@ -92,10 +92,12 @@ namespace gs
 
             // either of these might be missing...
 			bool brelx = GCodeUtil.TryFindParamNum(line.parameters, "XI", ref dx);
-			bool brely = GCodeUtil.TryFindParamNum(line.parameters, "YI", ref dy);	
+			bool brely = GCodeUtil.TryFindParamNum(line.parameters, "YI", ref dy);
+			Debug.Assert(brelx == true && brely == true);
 
 			double r = 0;
 			bool br = GCodeUtil.TryFindParamNum(line.parameters, "R", ref r);
+			Debug.Assert(br == true);
 
             // [RMS] seems like G5 always has negative radius and G4 positive ??
             //   (this will tell us)

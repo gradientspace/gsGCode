@@ -80,8 +80,8 @@ namespace gs
 			Vector2d c0,c1;
 			int nCenters = find_arc_centers(P, P2, radius, out c0, out c1);
 
-            bool b0Left = MathUtil.IsLeft(P, P2, c0) > 0;
-            bool b1Left = MathUtil.IsLeft(P, P2, c1) > 0;
+            //bool b0Left = MathUtil.IsLeft(P, P2, c0) > 0;
+            //bool b1Left = MathUtil.IsLeft(P, P2, c1) > 0;
 
 			Vector2d c = c0;
 			if (nCenters == 2 && clockwise == false )
