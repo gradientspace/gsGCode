@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,22 +18,40 @@ namespace gs
         {
             P = Vector2d.Zero;
         }
+		public void End()
+		{
+		}
 
+		// not sure what to do with these...
+		public void BeginTravel() {
+		}
+		public void BeginDeposition() {
+		}
 
-        public void LinearMoveToAbsolute(Vector2d v)
+        public void LinearMoveToAbsolute2d(Vector2d v)
         {
             Vector2d P2 = v;
             Complex.Add(new Segment2d(P, P2));
             P = P2;
         }
 
-        public void LinearMoveToRelative(Vector2d v)
+        public void LinearMoveToRelative2d(Vector2d v)
         {
             Vector2d P2 = P + v;
             Complex.Add(new Segment2d(P, P2));
             P = P2;
         }
 
+
+		public void LinearMoveToAbsolute3d(Vector3d v)
+		{
+			throw new NotSupportedException();
+		}
+
+		public void LinearMoveToRelative3d(Vector3d v)
+		{
+			throw new NotSupportedException();
+		}
 
 
 		int find_arc_centers(Vector2d p1, Vector2d p2, double radius, out Vector2d c0, out Vector2d c1)
@@ -73,7 +91,7 @@ namespace gs
 		}
 
 
-		public void ArcToRelative(Vector2d v, double radius, bool clockwise)
+		public void ArcToRelative2d(Vector2d v, double radius, bool clockwise)
         {
 			Vector2d P2 = P + v;
 

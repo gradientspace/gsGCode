@@ -28,10 +28,17 @@ namespace gs
     public interface IGCodeListener
     {
         void Begin();
+		void End();
 
-        void LinearMoveToAbsolute(Vector2d v);
-        void LinearMoveToRelative(Vector2d v);
-		void ArcToRelative(Vector2d pos, double radius, bool clockwise);
+		void BeginTravel();
+		void BeginDeposition();
+
+        void LinearMoveToAbsolute2d(Vector2d v);
+        void LinearMoveToRelative2d(Vector2d v);
+		void ArcToRelative2d(Vector2d pos, double radius, bool clockwise);
+
+		void LinearMoveToAbsolute3d(Vector3d v);
+		void LinearMoveToRelative3d(Vector3d v);
     }
 
 }

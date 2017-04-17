@@ -34,29 +34,82 @@ namespace gs
             if (line[0] == ';')
                 return make_comment(line, nLineNum);
 
+			// strip off trailing comment
+			string comment = null;
+			int ci = line.IndexOf(';');
+			if ( ci >= 1 ) {
+				comment = line.Substring(ci);
+				line = line.Substring(0, ci);
+			}
+				
+
             string[] tokens = line.Split( (char[])null , StringSplitOptions.RemoveEmptyEntries);
 
             // handle extra spaces at start...?
             if (tokens.Length == 0)
                 return make_blank(nLineNum);
-            if (tokens[0][0] == ';')
-                return make_comment(line, nLineNum);
+            
+			GCodeLine gcode = null;
+			switch ( tokens[0][0]) {
+				case ';':
+					gcode = make_comment(line, nLineNum);
+					break;
+				case 'N':
+					gcode = make_N_code_line(line, tokens, nLineNum);
+					break;
+				case 'G':
+				case 'M':
+					gcode = make_GM_code_line(line, tokens, nLineNum);
+					break;
+				case ':':
+					gcode = make_control_line(line, tokens, nLineNum);
+					break;
+				default:
+					gcode = make_string_line(line, nLineNum);
+					break;	
+			}
+				
+			if ( comment != null )
+				gcode.comment = comment;
 
-            if ( tokens[0][0] == 'N' ) 
-                return make_code_line(line, tokens, nLineNum);
-
-            if (tokens[0][0] == ':')
-                return make_control_line(line, tokens, nLineNum);
-
-            return make_string_line(line, nLineNum);
+			return gcode;
         }
 
 
 
 
+		// G### and M### code lines
+		virtual protected GCodeLine make_GM_code_line(string line, string[] tokens, int nLineNum)
+		{
+			GCodeLine.LType eType = GCodeLine.LType.UnknownCode;
+			if (tokens[0][0] == 'G')
+				eType = GCodeLine.LType.GCode;
+			else if (tokens[0][0] == 'M')
+				eType = GCodeLine.LType.MCode;
+
+			GCodeLine l = new GCodeLine(nLineNum, eType);
+			l.orig_string = line;
+
+			l.N = int.Parse(tokens[0].Substring(1));
+
+			// [TODO] comments
+
+			if (eType == GCodeLine.LType.UnknownCode) {
+				if (tokens.Length > 1)
+					l.parameters = parse_parameters(tokens, 1);
+			} else {
+				l.code = int.Parse(tokens[0].Substring(1));
+				if (tokens.Length > 1)
+					l.parameters = parse_parameters(tokens, 1);
+			}
+
+			return l;
+		}
+
+
         
         // N### lines
-        virtual protected GCodeLine make_code_line(string line, string[] tokens, int nLineNum)
+        virtual protected GCodeLine make_N_code_line(string line, string[] tokens, int nLineNum)
         {
             GCodeLine.LType eType = GCodeLine.LType.UnknownCode;
             if (tokens[1][0] == 'G')

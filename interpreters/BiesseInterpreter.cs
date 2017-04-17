@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,6 +42,8 @@ namespace gs
                 }
 
             }
+
+			listener.End();
         }
 
 
@@ -60,7 +62,7 @@ namespace gs
             bool brely = GCodeUtil.TryFindParamNum(line.parameters, "YI", ref dy);
 
             if (brelx || brely) {
-                listener.LinearMoveToRelative(new Vector2d(dx, dy));
+                listener.LinearMoveToRelative2d(new Vector2d(dx, dy));
                 return;
             }
 
@@ -68,7 +70,7 @@ namespace gs
             bool absx = GCodeUtil.TryFindParamNum(line.parameters, "X", ref x);
             bool absy = GCodeUtil.TryFindParamNum(line.parameters, "Y", ref y);
             if ( absx && absy ) {
-                listener.LinearMoveToAbsolute(new Vector2d(x, y));
+                listener.LinearMoveToAbsolute2d(new Vector2d(x, y));
                 return;
             }
 
@@ -104,7 +106,7 @@ namespace gs
             Debug.Assert((clockwise && r < 0) || (clockwise == false && r > 0));
             r = Math.Abs(r);
 
-			listener.ArcToRelative( new Vector2d(dx,dy), r, clockwise );			
+			listener.ArcToRelative2d( new Vector2d(dx,dy), r, clockwise );			
 		}
 
 
