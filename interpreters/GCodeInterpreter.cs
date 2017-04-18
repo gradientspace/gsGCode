@@ -33,12 +33,12 @@ namespace gs
 		void BeginTravel();
 		void BeginDeposition();
 
-        void LinearMoveToAbsolute2d(Vector2d v);
-        void LinearMoveToRelative2d(Vector2d v);
-		void ArcToRelative2d(Vector2d pos, double radius, bool clockwise);
+        void LinearMoveToAbsolute2d(Vector2d v, double rate = 0);
+		void LinearMoveToRelative2d(Vector2d v, double rate = 0);
+		void ArcToRelative2d(Vector2d pos, double radius, bool clockwise, double rate = 0);
 
-		void LinearMoveToAbsolute3d(Vector3d v);
-		void LinearMoveToRelative3d(Vector3d v);
+		void LinearMoveToAbsolute3d(Vector3d v, double rate = 0);
+		void LinearMoveToRelative3d(Vector3d v, double rate = 0);
     }
 
 }

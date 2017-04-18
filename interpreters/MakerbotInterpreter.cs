@@ -61,7 +61,7 @@ namespace gs
 
 			// F is feed rate (this changes?)
 			double f = 0;
-			bool haveF = GCodeUtil.TryFindParamNum(line.parameters, "F", ref f);
+			/*bool haveF =*/ GCodeUtil.TryFindParamNum(line.parameters, "F", ref f);
 
 			// A is extrusion stepper
 			double a = 0;

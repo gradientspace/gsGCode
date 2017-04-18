@@ -37,6 +37,12 @@ namespace gs
 			// strip off trailing comment
 			string comment = null;
 			int ci = line.IndexOf(';');
+			if ( ci < 0 ) {
+				int bo = line.IndexOf('(');
+				int bc = line.IndexOf(')');
+				if ( bo >= 0 && bc > 0 )
+					ci = bo;
+			}
 			if ( ci >= 1 ) {
 				comment = line.Substring(ci);
 				line = line.Substring(0, ci);
