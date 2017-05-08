@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using g3;
 
 namespace gs
 {
-
     static public class GCodeUtil
     {
+		public const double UnspecifiedValue = double.MaxValue;
+		public static readonly Vector3d UnspecifiedPosition = Vector3d.MaxValue;
 
+		public static Vector3d Extrude(double a) {
+			return new Vector3d(a, UnspecifiedValue, UnspecifiedValue);
+		}
 
 
         // returns index of param, or -1
@@ -23,6 +28,8 @@ namespace gs
 
         static public bool TryFindParamNum(GCodeParam[] paramList, string identifier, ref double d)
         {
+			if (paramList == null )
+				return false;
             for (int i = 0; i < paramList.Length; ++i) {
                 if (paramList[i].identifier == identifier) {
                     if (paramList[i].type == GCodeParam.PType.DoubleValue) {

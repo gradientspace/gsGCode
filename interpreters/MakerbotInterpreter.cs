@@ -5,11 +5,20 @@ using g3;
 
 namespace gs 
 {
+	// useful documents:
+	//   https://github.com/makerbot/s3g/blob/master/doc/GCodeProtocol.md
+
+
+	/// <summary>
+	/// Makerbot GCode interpreter.
+	/// </summary>
 	public class MakerbotInterpreter : IGCodeInterpreter
 	{
 		IGCodeListener listener = null;
 
 		Dictionary<int, Action<GCodeLine>> GCodeMap = new Dictionary<int, Action<GCodeLine>>();
+
+		Vector3d CurPosition = Vector3d.Zero;
 
 		double ExtrusionA = 0;
 		double LastRetractA = 0;
@@ -35,6 +44,7 @@ namespace gs
 			listener.Begin();
 
 			ExtrusionA = 0;
+			CurPosition = Vector3d.Zero;
 
 			foreach(GCodeLine line in lines_enum) {
 
@@ -54,21 +64,40 @@ namespace gs
 		{
 			Debug.Assert(line.code == 1);
 
-			double x = 0, y = 0, z = 0;
+			double x = GCodeUtil.UnspecifiedValue, 
+				y = GCodeUtil.UnspecifiedValue, 
+				z = GCodeUtil.UnspecifiedValue;
 			bool absx = GCodeUtil.TryFindParamNum(line.parameters, "X", ref x);
 			bool absy = GCodeUtil.TryFindParamNum(line.parameters, "Y", ref y);
 			bool absz = GCodeUtil.TryFindParamNum(line.parameters, "Z", ref z);
+			Vector3d newPos = CurPosition;
+			if ( absx )
+				newPos.x = x;
+			if ( absy )
+				newPos.y = y;
+			if ( absz )
+				newPos.z = z;
+			CurPosition = newPos;
 
 			// F is feed rate (this changes?)
 			double f = 0;
-			/*bool haveF =*/ GCodeUtil.TryFindParamNum(line.parameters, "F", ref f);
+			bool haveF = GCodeUtil.TryFindParamNum(line.parameters, "F", ref f);
 
-			// A is extrusion stepper
+			// A is extrusion stepper. E is also "current" stepper.
 			double a = 0;
 			bool haveA = GCodeUtil.TryFindParamNum(line.parameters, "A", ref a);
+			if ( haveA == false ) {
+				haveA = GCodeUtil.TryFindParamNum(line.parameters, "E", ref a);
+			}
+
+			LinearMoveData move = new LinearMoveData(
+				newPos,
+				(haveF) ? f : GCodeUtil.UnspecifiedValue,
+				(haveA) ? GCodeUtil.Extrude(a) : GCodeUtil.UnspecifiedPosition );
 
 			if ( haveA == false ) {
-				Debug.Assert(in_retract);
+				// just ignore this state? happens a few times at startup...
+				//Debug.Assert(in_retract);
 			} else if (in_retract) {
 				Debug.Assert(a <= LastRetractA);
 				if ( MathUtil.EpsilonEqual(a, LastRetractA, 0.00001) ) {
@@ -85,13 +114,39 @@ namespace gs
 				ExtrusionA = a;
 			}
 
-			Debug.Assert(absx && absy && absz);
-			if ( absx && absy && absz ) {
-				listener.LinearMoveToAbsolute3d(new g3.Vector3d(x,y,z));
-				return;
+			move.source = line;
+			listener.LinearMoveToAbsolute3d(move);
+		}
+
+
+
+		// G92 - Position register: Set the specified axes positions to the given position
+		// Sets the position of the state machine and the bot. NB: There are two methods of forming the G92 command:
+		void set_position(GCodeLine line)
+		{
+			double x = 0, y = 0, z = 0, a = 0;
+			if ( GCodeUtil.TryFindParamNum(line.parameters, "X", ref x ) ) {
+				CurPosition.x = x;
+			}
+			if ( GCodeUtil.TryFindParamNum(line.parameters, "Y", ref y ) ) {
+				CurPosition.y = y;
+			}
+			if ( GCodeUtil.TryFindParamNum(line.parameters, "Z", ref z ) ) {
+				CurPosition.z = z;
+			}
+			if ( GCodeUtil.TryFindParamNum(line.parameters, "A", ref a ) ) {
+				ExtrusionA = a;
+				listener.CustomCommand(
+					(int)CustomListenerCommands.ResetExtruder, GCodeUtil.Extrude(a) );
 			}
 
-
+			// E is "current" stepper (A for single extruder)
+			double e = 0;
+			if ( GCodeUtil.TryFindParamNum(line.parameters, "A", ref e ) ) {
+				ExtrusionA = e;
+				listener.CustomCommand(
+					(int)CustomListenerCommands.ResetExtruder, GCodeUtil.Extrude(e) );
+			}
 		}
 
 
@@ -105,6 +160,8 @@ namespace gs
 			// G4 = CCW circular
 			//GCodeMap[4] = emit_ccw_arc;
 			//GCodeMap[5] = emit_cw_arc;
+
+			GCodeMap[92] = set_position;
 		}
 
 

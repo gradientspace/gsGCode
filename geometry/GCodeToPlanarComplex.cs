@@ -28,27 +28,27 @@ namespace gs
 		public void BeginDeposition() {
 		}
 
-		public void LinearMoveToAbsolute2d(Vector2d v, double rate = 0)
+		public void LinearMoveToAbsolute2d(LinearMoveData move)
         {
-            Vector2d P2 = v;
+			Vector2d P2 = move.position.xy;
             Complex.Add(new Segment2d(P, P2));
             P = P2;
         }
 
-		public void LinearMoveToRelative2d(Vector2d v, double rate = 0)
+		public void LinearMoveToRelative2d(LinearMoveData move)
         {
-            Vector2d P2 = P + v;
+			Vector2d P2 = P + move.position.xy;
             Complex.Add(new Segment2d(P, P2));
             P = P2;
         }
 
 
-		public void LinearMoveToAbsolute3d(Vector3d v, double rate = 0)
+		public void LinearMoveToAbsolute3d(LinearMoveData move)
 		{
 			throw new NotSupportedException();
 		}
 
-		public void LinearMoveToRelative3d(Vector3d v, double rate = 0)
+		public void LinearMoveToRelative3d(LinearMoveData move)
 		{
 			throw new NotSupportedException();
 		}
@@ -127,6 +127,9 @@ namespace gs
         }
 
 
+		public void CustomCommand(int code, object o) {
+			// ignore all for now
+		}
 
     }
 }

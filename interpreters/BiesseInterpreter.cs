@@ -61,8 +61,10 @@ namespace gs
             bool brelx = GCodeUtil.TryFindParamNum(line.parameters, "XI", ref dx);
             bool brely = GCodeUtil.TryFindParamNum(line.parameters, "YI", ref dy);
 
+			LinearMoveData move = new LinearMoveData(new Vector2d(dx,dy));
+
             if (brelx || brely) {
-                listener.LinearMoveToRelative2d(new Vector2d(dx, dy));
+                listener.LinearMoveToRelative2d(move);
                 return;
             }
 
@@ -70,7 +72,7 @@ namespace gs
             bool absx = GCodeUtil.TryFindParamNum(line.parameters, "X", ref x);
             bool absy = GCodeUtil.TryFindParamNum(line.parameters, "Y", ref y);
             if ( absx && absy ) {
-                listener.LinearMoveToAbsolute2d(new Vector2d(x, y));
+                listener.LinearMoveToAbsolute2d(move);
                 return;
             }
 

@@ -229,7 +229,11 @@ namespace gs
 					parse_noequals_num_parameter( tokens[ti], ref paramList[pi] );
 					bHandled = true;
 
-                } 
+				} else if ( tokens[ti].Length == 1 ) {
+					paramList[pi].type = GCodeParam.PType.NoValue;
+					paramList[pi].identifier = tokens[ti];
+					bHandled = true;
+				}
 
 				if (!bHandled) {
                     paramList[pi].type = GCodeParam.PType.Unknown;
@@ -260,7 +264,7 @@ namespace gs
 		virtual protected int is_num_parameter(string token) 
 		{
 			int N = token.Length;
-			for ( int i = 1; i < N-1; ++i ) {
+			for ( int i = 1; i < N; ++i ) {
 				string sub = token.Substring(i);
 				if ( GCodeUtil.GetNumberType(sub) != GCodeUtil.NumberType.NotANumber )
 					return i;
