@@ -1,8 +1,9 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using g3;
+using gs;
 
 namespace gs
 {
@@ -24,9 +25,36 @@ namespace gs
 		public MakerbotAssembler(GCodeBuilder useBuilder, MakerbotSettings settings) {
 			Builder = useBuilder;
 			Settings = settings;
+			currentPos = Vector3d.Zero;
+			extruderA = 0;
 		}
 
 
+
+		Vector3d currentPos;
+		public Vector3d NozzlePosition
+		{
+			get { return currentPos; }
+		}
+
+		double extruderA;
+		public double ExtruderA 
+		{
+			get { return extruderA; }
+		}
+
+		bool in_retract;
+		double retractA;
+		public bool InRetract
+		{
+			get { return in_retract; }
+		}
+
+		bool in_travel;
+		public bool InTravel 
+		{
+			get { return in_travel; }
+		}
 
 
 
@@ -36,11 +64,14 @@ namespace gs
 		public virtual void AppendMoveTo(double x, double y, double z, double f, string comment = null) {
 			Builder.BeginGLine(1, comment).
 			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f);
+			currentPos = new Vector3d(x, y, z);
 		}
 
 		public virtual void AppendMoveToE(double x, double y, double z, double f, double e, string comment = null) {
 			Builder.BeginGLine(1, comment).
 			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f).AppendF("E",e);
+			currentPos = new Vector3d(x, y, z);
+			extruderA = e;
 		}
 
 		public virtual void AppendMoveToA(Vector3d pos, double f, double a, string comment = null) {
@@ -49,8 +80,46 @@ namespace gs
 		public virtual void AppendMoveToA(double x, double y, double z, double f, double a, string comment = null) {
 			Builder.BeginGLine(1, comment).
 			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f).AppendF("A",a);
+			currentPos = new Vector3d(x, y, z);
+			extruderA = a;
 		}
 
+
+		public virtual void BeginRetract(Vector3d pos, double f, double a) {
+			if (in_retract)
+				throw new Exception("MakerbotAssembler.BeginRetract: already in retract!");
+			if (a > extruderA)
+				throw new Exception("MakerbotAssembler.BeginRetract: retract extrudeA is forward motion!");
+			retractA = extruderA;
+			AppendMoveToA(pos, f, a, "Retract");
+			// [RMS] makerbot does this...but does it do anything??
+			AppendMoveTo(pos, 3000, "Retract 2?");
+			in_retract = true;
+		}
+
+		public virtual void EndRetract(Vector3d pos, double f, double a = -9999) {
+			if (! in_retract)
+				throw new Exception("MakerbotAssembler.EndRetract: already in retract!");
+			if (a != -9999 && a != retractA)
+				throw new Exception("MakerbotAssembler.EndRetract: restart position is not same as start of retract!");
+			if (a == -9999)
+				a = retractA;
+			AppendMoveToA(pos, f, a, "Restart");
+			in_retract = false;			
+		}
+
+		public virtual void BeginTravel() {
+			if (in_travel)
+				throw new Exception("MakerbotAssembler.BeginTravel: already in travel!");
+			in_travel = true;
+		}
+
+		public virtual void EndTravel()
+		{
+			if (in_travel == false)
+				throw new Exception("MakerbotAssembler.EndTravel: not in travel!");
+			in_travel = false;
+		}
 
 		public virtual void AppendTravelTo(double x, double y, double z, double f)
 		{
@@ -72,6 +141,11 @@ namespace gs
 		public virtual void DisableFan() {
 			Builder.BeginMLine(127).AppendI("T",0);
 		}
+
+
+
+
+
 
 
 
@@ -109,9 +183,12 @@ namespace gs
 
 			Builder.BeginGLine(92, "(set Z to -5)").
 			       AppendI("X",0).AppendI("Y",0).AppendI("Z",-5).AppendI("A",0).AppendI("B",0);
+			currentPos = new Vector3d(0, 0, -5);
+			extruderA = 0;			
 
 			Builder.BeginGLine(1, "(move Z to '0')")
 			       .AppendI("Z", 0).AppendI("F", 900);
+			currentPos.z = 0;		
 
 			Builder.BeginGLine(161, "(home Z axis minimum)")
 			       .AppendL("Z").AppendI("F", 100);
@@ -121,9 +198,12 @@ namespace gs
 
 			Builder.BeginGLine(92).
 			       AppendF("X",BackRight.x).AppendF("Y",BackRight.y).AppendI("Z",0).AppendI("A",0).AppendI("B",0);
+			currentPos = new Vector3d(BackRight.x, BackRight.y, 0);
+			extruderA = 0;
 
 			Builder.BeginGLine(1, "(move to waiting position)").
 			       AppendF("X",FrontLeft.x).AppendF("Y",FrontLeft.y).AppendI("Z",40).AppendI("F",3300);
+			currentPos = new Vector3d(FrontLeft.x, FrontLeft.y, 40);
 
 			Builder.BeginGLine(130, "(Lower stepper Vrefs while heating)").
 			       AppendI("X",20).AppendI("Y",20).AppendI("A",20).AppendI("B",20);
@@ -146,20 +226,26 @@ namespace gs
 			AppendMoveToE(FrontLeft.x, FrontLeft.y, PrimeHeight, 1800, 25, "(Extruder Prime Start)");
 
 			Builder.BeginGLine(92,"(Reset after prime)").AppendI("A",0).AppendI("B",0);
+			extruderA = 0;
 
 			// move to z=0
 			Builder.BeginGLine(1).AppendI("Z",0).AppendI("F",1000);
+			currentPos.z = 0;
 
 			// move to front-left corner
 			AppendMoveToE(FrontLeft.x, FrontLeft.y, 0, 1000, 0);
 
 			// reset E/A stepper 
 			Builder.BeginGLine(92).AppendI("E",0);
+			extruderA = 0;
 
 			// should do this at higher level...
 			//AppendMoveToA(FrontLeft.x, FrontLeft.y, 0, 1500, -1.3, "Retract");
 			//AppendMoveTo(FrontLeft.x, FrontLeft.y, 0, 3000);		// what is this line for??
 			//AppendMoveTo(FrontLeft.x, FrontLeft.y, LayerHeight, 1380, "Next Layer");
+
+			in_retract = false;
+			in_travel = false;
 
 			UpdateProgress(0);
 		}
