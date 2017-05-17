@@ -44,7 +44,7 @@ namespace gs
 
 		public double ZTravelSpeed = 23 * 60;   // 1380
 
-		public double RapidMoveSpeed = 150 * 60;  // 9000
+		public double RapidTravelSpeed = 150 * 60;  // 9000
 
 		public double FirstLayerExtrudeSpeed = 30 * 60;  // 1800
 	}
