@@ -90,6 +90,10 @@ namespace gs
 				throw new Exception("MakerbotAssembler.BeginRetract: already in retract!");
 			if (a > extruderA)
 				throw new Exception("MakerbotAssembler.BeginRetract: retract extrudeA is forward motion!");
+
+			// [TODO] makerbot gcode disables fan here
+			//		disable fan for every tiny travel? seems pointless...
+
 			retractA = extruderA;
 			AppendMoveToA(pos, f, a, "Retract");
 			// [RMS] makerbot does this...but does it do anything??
@@ -100,12 +104,14 @@ namespace gs
 		public virtual void EndRetract(Vector3d pos, double f, double a = -9999) {
 			if (! in_retract)
 				throw new Exception("MakerbotAssembler.EndRetract: already in retract!");
-			if (a != -9999 && a != retractA)
+			if (a != -9999 && MathUtil.EpsilonEqual(a, retractA, 0.0001) == false )
 				throw new Exception("MakerbotAssembler.EndRetract: restart position is not same as start of retract!");
 			if (a == -9999)
 				a = retractA;
 			AppendMoveToA(pos, f, a, "Restart");
-			in_retract = false;			
+			in_retract = false;
+
+			// [TODO] re-enable fan here
 		}
 
 		public virtual void BeginTravel() {
