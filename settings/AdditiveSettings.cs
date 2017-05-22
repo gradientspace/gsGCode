@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using g3;
@@ -46,8 +46,8 @@ namespace gs
 
 		public double RapidTravelSpeed = 150 * 60;  // 9000
 
-		public double FirstLayerExtrudeSpeed = 30 * 60;  // 1800
-		public double RapidExtrudeSpeed = 90 * 60;		 // 5400
+		public double CarefulExtrudeSpeed = 30 * 60;  	// 1800
+		public double RapidExtrudeSpeed = 90 * 60;		// 5400
 	}
 
 }

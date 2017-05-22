@@ -99,7 +99,7 @@ namespace gs
 				// just ignore this state? happens a few times at startup...
 				//Debug.Assert(in_retract);
 			} else if (in_retract) {
-				Debug.Assert(a <= LastRetractA);
+				Debug.Assert(a <= LastRetractA+0.001);
 				if ( MathUtil.EpsilonEqual(a, LastRetractA, 0.00001) ) {
 					in_retract = false;
 					listener.BeginDeposition();
@@ -142,7 +142,7 @@ namespace gs
 
 			// E is "current" stepper (A for single extruder)
 			double e = 0;
-			if ( GCodeUtil.TryFindParamNum(line.parameters, "A", ref e ) ) {
+			if ( GCodeUtil.TryFindParamNum(line.parameters, "E", ref e ) ) {
 				ExtrusionA = e;
 				listener.CustomCommand(
 					(int)CustomListenerCommands.ResetExtruder, GCodeUtil.Extrude(e) );
