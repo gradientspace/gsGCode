@@ -50,6 +50,12 @@ namespace gs
 		public double RapidExtrudeSpeed = 90 * 60;      // 5400
 
 
+        /*
+         * Shells
+         */
+        public int Shells = 2;
+        public int InteriorSolidRegionShells = 1;
+
 		/*
 		 * Roof/Floors
 		 */
