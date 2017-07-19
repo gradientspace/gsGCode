@@ -23,6 +23,8 @@ namespace gs
 		double ExtrusionA = 0;
 		double LastRetractA = 0;
 		bool in_retract = false;
+		bool in_travel = false;
+		bool in_extrude = false;
 
 		public MakerbotInterpreter() {
 			build_maps();			
@@ -96,25 +98,50 @@ namespace gs
 				(haveA) ? GCodeUtil.Extrude(a) : GCodeUtil.UnspecifiedPosition );
 
 			if ( haveA == false ) {
-				// just ignore this state? happens a few times at startup...
-				//Debug.Assert(in_retract);
+				// if we do not have extrusion, this is a travel move
+				if (in_travel == false) {
+					listener.BeginTravel();
+					in_travel = true;
+					in_extrude = false;
+				}
+
 			} else if (in_retract) {
+				// if we are in retract, we stay in until we see forward movement
+
+				Debug.Assert(in_travel);
 				Debug.Assert(a <= LastRetractA+0.001);
 				if ( MathUtil.EpsilonEqual(a, LastRetractA, 0.00001) ) {
 					in_retract = false;
 					listener.BeginDeposition();
 					ExtrusionA = a;
 				}
+
 			} else if ( a < ExtrusionA ) {
+				// if extrusion moved backwards, we need to enter travel
+
 				in_retract = true;
 				LastRetractA = ExtrusionA;
 				ExtrusionA = a;
-				listener.BeginTravel();
+				if (in_travel == false) {
+					listener.BeginTravel();
+					in_travel = true;
+					in_extrude = false;
+				}
 			} else {
+				// if we are in travel, we need to begin extruding
+				if (in_travel) {
+					listener.BeginDeposition();
+					in_travel = false;
+				}
+				if (in_extrude == false) {		// handle initialization cases
+					listener.BeginDeposition();
+					in_extrude = true;
+				}
 				ExtrusionA = a;
 			}
 
 			move.source = line;
+			Debug.Assert(in_travel || in_extrude);
 			listener.LinearMoveToAbsolute3d(move);
 		}
 
@@ -138,6 +165,8 @@ namespace gs
 				ExtrusionA = a;
 				listener.CustomCommand(
 					(int)CustomListenerCommands.ResetExtruder, GCodeUtil.Extrude(a) );
+				// reset our state
+				in_travel = in_extrude = in_retract = false;	
 			}
 
 			// E is "current" stepper (A for single extruder)
@@ -146,6 +175,8 @@ namespace gs
 				ExtrusionA = e;
 				listener.CustomCommand(
 					(int)CustomListenerCommands.ResetExtruder, GCodeUtil.Extrude(e) );
+				// reset our state
+				in_travel = in_extrude = in_retract = false;
 			}
 		}
 
@@ -153,6 +184,8 @@ namespace gs
 
 		void build_maps()
 		{
+			// G0 = rapid move
+			GCodeMap[0] = emit_linear;
 
 			// G1 = linear move
 			GCodeMap[1] = emit_linear;
