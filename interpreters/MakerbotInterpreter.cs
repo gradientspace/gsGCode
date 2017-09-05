@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using g3;
@@ -59,6 +60,34 @@ namespace gs
 
 			listener.End();
 		}
+
+
+
+
+        public virtual IEnumerable<bool> InterpretInteractive(GCodeFile file, InterpretArgs args)
+        {
+            IEnumerable<GCodeLine> lines_enum =
+                (args.HasTypeFilter) ? file.AllLinesOfType(args.eTypeFilter) : file.AllLines();
+
+            listener.Begin();
+
+            ExtrusionA = 0;
+            CurPosition = Vector3d.Zero;
+
+            foreach (GCodeLine line in lines_enum) {
+                if (line.type == GCodeLine.LType.GCode) {
+                    Action<GCodeLine> parseF;
+                    if (GCodeMap.TryGetValue(line.code, out parseF)) {
+                        parseF(line);
+                        yield return true;
+                    }
+                }
+            }
+
+            listener.End();
+
+            yield return false;
+        }
 
 
 
