@@ -67,6 +67,12 @@ namespace gs
 		 * Sparse infill settings
 		 */
 		public double SparseLinearInfillStepX = 3.0;      // this is a multiplier on FillPathSpacingMM
+
+
+        /*
+         * Other options
+         */
+        public bool ClipSelfOverlaps = false;
 	}
 
 }
