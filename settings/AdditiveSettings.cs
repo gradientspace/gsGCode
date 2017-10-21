@@ -80,7 +80,7 @@ namespace gs
          * Debug/Utility options
          */
 
-        public Interval1i LayerRangeFilter = Interval1i.Infinite;   // only compute slices in this range
+        public Interval1i LayerRangeFilter = new Interval1i(0, 999999999);   // only compute slices in this range
 	}
 
 }
