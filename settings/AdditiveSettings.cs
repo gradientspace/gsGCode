@@ -54,7 +54,7 @@ namespace gs
          * Shells
          */
         public int Shells = 2;
-        public int InteriorSolidRegionShells = 1;
+        public int InteriorSolidRegionShells = 1;       // how many shells to add around interior solid regions (eg roof/floor)
 
 		/*
 		 * Roof/Floors
@@ -70,9 +70,17 @@ namespace gs
 
 
         /*
-         * Other options
+         * Toolpath filtering options
          */
-        public bool ClipSelfOverlaps = false;
+        public bool ClipSelfOverlaps = false;            // if true, try to remove portions of toolpaths that will self-overlap
+        public double SelfOverlapToleranceX = 0.75;      // what counts as 'self-overla'. this is a multiplier on NozzleDiamMM
+
+
+        /*
+         * Debug/Utility options
+         */
+
+        public Interval1i LayerRangeFilter = Interval1i.Infinite;   // only compute slices in this range
 	}
 
 }
