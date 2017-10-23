@@ -142,6 +142,8 @@ namespace gs
 				if ( MathUtil.EpsilonEqual(a, LastRetractA, 0.00001) ) {
 					in_retract = false;
 					listener.BeginDeposition();
+					in_extrude = true;
+					in_travel = false;
 					ExtrusionA = a;
 				}
 
@@ -161,6 +163,7 @@ namespace gs
 				if (in_travel) {
 					listener.BeginDeposition();
 					in_travel = false;
+					in_extrude = true;
 				}
 				if (in_extrude == false) {		// handle initialization cases
 					listener.BeginDeposition();
