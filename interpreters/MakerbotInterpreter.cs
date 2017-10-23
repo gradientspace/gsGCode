@@ -18,6 +18,11 @@ namespace gs
 		IGCodeListener listener = null;
 
 		Dictionary<int, Action<GCodeLine>> GCodeMap = new Dictionary<int, Action<GCodeLine>>();
+		Dictionary<int, Action<GCodeLine>> MCodeMap = new Dictionary<int, Action<GCodeLine>>();
+
+
+		bool UseRelativeExtruder = false;
+
 
 		Vector3d CurPosition = Vector3d.Zero;
 
@@ -50,10 +55,12 @@ namespace gs
 			CurPosition = Vector3d.Zero;
 
 			foreach(GCodeLine line in lines_enum) {
-
-				if ( line.type == GCodeLine.LType.GCode ) {
-					Action<GCodeLine> parseF;
+				Action<GCodeLine> parseF;
+				if (line.type == GCodeLine.LType.GCode) {
 					if (GCodeMap.TryGetValue(line.code, out parseF))
+						parseF(line);
+				} else if (line.type == GCodeLine.LType.MCode) {
+					if (MCodeMap.TryGetValue(line.code, out parseF))
 						parseF(line);
 				}
 			}
@@ -120,6 +127,8 @@ namespace gs
 			if ( haveA == false ) {
 				haveA = GCodeUtil.TryFindParamNum(line.parameters, "E", ref a);
 			}
+			if (UseRelativeExtruder)
+				a = ExtrusionA + a;
 
 			LinearMoveData move = new LinearMoveData(
 				newPos,
@@ -213,6 +222,19 @@ namespace gs
 		}
 
 
+		void set_relative_positioning(GCodeLine line)
+		{
+			throw new NotImplementedException("MakerbotInterpreter.set_relative_positioning: not implemented!");
+		}
+
+
+		// M83
+		void set_relative_extruder(GCodeLine line)
+		{
+			UseRelativeExtruder = true;
+		}
+
+
 
 		void build_maps()
 		{
@@ -226,7 +248,12 @@ namespace gs
 			//GCodeMap[4] = emit_ccw_arc;
 			//GCodeMap[5] = emit_cw_arc;
 
+			GCodeMap[91] = set_relative_positioning;
 			GCodeMap[92] = set_position;
+
+
+			// M83: Set extruder to relative mode : http://reprap.org/wiki/G-code#M83:_Set_extruder_to_relative_mode
+			MCodeMap[83] = set_relative_extruder;
 		}
 
 
