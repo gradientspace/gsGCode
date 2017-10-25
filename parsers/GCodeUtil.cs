@@ -76,6 +76,8 @@ namespace gs
                     return NumberType.NotANumber;
                 }
             }
+            if (!saw_digit)
+                return NumberType.NotANumber;
             return (saw_dot) ? NumberType.Decimal : NumberType.Integer;
         }
 

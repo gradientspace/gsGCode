@@ -21,6 +21,7 @@ namespace gs
 		Dictionary<int, Action<GCodeLine>> MCodeMap = new Dictionary<int, Action<GCodeLine>>();
 
 
+        bool UseRelativePosition = false;
 		bool UseRelativeExtruder = false;
 
 
@@ -100,22 +101,25 @@ namespace gs
 
 		void emit_linear(GCodeLine line)
 		{
-			Debug.Assert(line.code == 1);
+			Debug.Assert(line.code == 0 || line.code == 1);
 
 			double x = GCodeUtil.UnspecifiedValue, 
 				y = GCodeUtil.UnspecifiedValue, 
 				z = GCodeUtil.UnspecifiedValue;
-			bool absx = GCodeUtil.TryFindParamNum(line.parameters, "X", ref x);
-			bool absy = GCodeUtil.TryFindParamNum(line.parameters, "Y", ref y);
-			bool absz = GCodeUtil.TryFindParamNum(line.parameters, "Z", ref z);
-			Vector3d newPos = CurPosition;
-			if ( absx )
+			bool found_x = GCodeUtil.TryFindParamNum(line.parameters, "X", ref x);
+			bool found_y = GCodeUtil.TryFindParamNum(line.parameters, "Y", ref y);
+			bool found_z = GCodeUtil.TryFindParamNum(line.parameters, "Z", ref z);
+			Vector3d newPos = (UseRelativePosition) ? Vector3d.Zero : CurPosition;
+			if ( found_x )
 				newPos.x = x;
-			if ( absy )
+			if ( found_y )
 				newPos.y = y;
-			if ( absz )
+			if ( found_z )
 				newPos.z = z;
-			CurPosition = newPos;
+            if (UseRelativePosition)
+                CurPosition += newPos;
+            else
+			    CurPosition = newPos;
 
 			// F is feed rate (this changes?)
 			double f = 0;
@@ -222,15 +226,26 @@ namespace gs
 		}
 
 
-		void set_relative_positioning(GCodeLine line)
-		{
-			throw new NotImplementedException("MakerbotInterpreter.set_relative_positioning: not implemented!");
+        // G90
+        void set_absolute_positioning(GCodeLine line) {
+            UseRelativePosition = false;
+        }
+        // G91
+        void set_relative_positioning(GCodeLine line) {
+            UseRelativePosition = true;
+
+            // [RMS] according to http://reprap.org/wiki/G-code#G91:_Set_to_Relative_Positioning, 
+            //   this should only happen on some firmware...
+            UseRelativeExtruder = true;
 		}
 
 
-		// M83
-		void set_relative_extruder(GCodeLine line)
-		{
+        // M82
+        void set_absolute_extruder(GCodeLine line) {
+            UseRelativeExtruder = false;
+        }
+        // M83
+        void set_relative_extruder(GCodeLine line) {
 			UseRelativeExtruder = true;
 		}
 
@@ -244,17 +259,18 @@ namespace gs
 			// G1 = linear move
 			GCodeMap[1] = emit_linear;
 
-			// G4 = CCW circular
-			//GCodeMap[4] = emit_ccw_arc;
-			//GCodeMap[5] = emit_cw_arc;
+            // G4 = CCW circular
+            //GCodeMap[4] = emit_ccw_arc;
+            //GCodeMap[5] = emit_cw_arc;
 
-			GCodeMap[91] = set_relative_positioning;
-			GCodeMap[92] = set_position;
+            GCodeMap[90] = set_absolute_positioning;    // http://reprap.org/wiki/G-code#G90:_Set_to_Absolute_Positioning
+            GCodeMap[91] = set_relative_positioning;    // http://reprap.org/wiki/G-code#G91:_Set_to_Relative_Positioning
+            GCodeMap[92] = set_position;                // http://reprap.org/wiki/G-code#G92:_Set_Position
 
 
-			// M83: Set extruder to relative mode : http://reprap.org/wiki/G-code#M83:_Set_extruder_to_relative_mode
-			MCodeMap[83] = set_relative_extruder;
-		}
+            MCodeMap[82] = set_relative_extruder;       // http://reprap.org/wiki/G-code#M83:_Set_extruder_to_relative_mode
+            MCodeMap[83] = set_relative_extruder;       // http://reprap.org/wiki/G-code#M83:_Set_extruder_to_relative_mode
+        }
 
 
 	}

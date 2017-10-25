@@ -236,8 +236,8 @@ namespace gs
 				}
 
 				if (!bHandled) {
-                    paramList[pi].type = GCodeParam.PType.Unknown;
-                    paramList[pi].identifier = tokens[ti];
+                    paramList[pi].type = GCodeParam.PType.TextValue;
+                    paramList[pi].textValue = tokens[ti];
                 }
             }
 
@@ -264,10 +264,21 @@ namespace gs
 		virtual protected int is_num_parameter(string token) 
 		{
 			int N = token.Length;
-			for ( int i = 1; i < N; ++i ) {
+
+            bool contains_number = false;
+            for (int i = 0; i < N && contains_number == false; ++i) {
+                if (Char.IsDigit(token[i]))
+                    contains_number = true;
+            }
+            if (!contains_number)
+                return -1;
+
+            for ( int i = 1; i < N; ++i ) {
 				string sub = token.Substring(i);
-				if ( GCodeUtil.GetNumberType(sub) != GCodeUtil.NumberType.NotANumber )
-					return i;
+                GCodeUtil.NumberType numtype = GCodeUtil.GetNumberType(sub);
+                if (numtype != GCodeUtil.NumberType.NotANumber) {
+                    return i;
+                }
 			}
 			return -1;
 		}
