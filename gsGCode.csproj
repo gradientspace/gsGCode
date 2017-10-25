@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="builders\BaseDepositionAssembler.cs" />
     <Compile Include="GCodeFile.cs" />
     <Compile Include="interpreters\BiesseInterpreter.cs" />
     <Compile Include="interpreters\GCodeInterpreter.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="interpreters\MakerbotInterpreter.cs" />
     <Compile Include="GCodeLine.cs" />
+    <Compile Include="settings\MonopriceSettings.cs" />
     <Compile Include="writers\BaseGCodeWriter.cs" />
     <Compile Include="writers\StandardGCodeWriter.cs" />
     <Compile Include="builders\IGCodeAccumulator.cs" />
@@ -64,11 +66,7 @@
       <Name>geometry3Sharp</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="writers\" />
-    <Folder Include="builders\" />
-    <Folder Include="settings\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

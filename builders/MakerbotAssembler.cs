@@ -7,144 +7,46 @@ using gs;
 
 namespace gs
 {
-	public interface IDepositionAssembler
-	{
-	}
 
-
-
-
-
-
-	public class MakerbotAssembler : IDepositionAssembler
-	{
-		public GCodeBuilder Builder;
+	public class MakerbotAssembler : BaseDepositionAssembler
+    {
 		public MakerbotSettings Settings;
 
 
-		public MakerbotAssembler(GCodeBuilder useBuilder, MakerbotSettings settings) {
-			Builder = useBuilder;
+		public MakerbotAssembler(GCodeBuilder useBuilder, MakerbotSettings settings) : base(useBuilder)
+        {
 			Settings = settings;
-			currentPos = Vector3d.Zero;
-			extruderA = 0;
 		}
 
 
+		public override void BeginRetract(Vector3d pos, double feedRate, double extrudeDist, string comment = null) {
+            // [TODO] makerbot gcode disables fan here
+            //		disable fan for every tiny travel? seems pointless...
 
-		Vector3d currentPos;
-		public Vector3d NozzlePosition
-		{
-			get { return currentPos; }
+            base.BeginRetract(pos, feedRate, extrudeDist, comment);
+
+            // [RMS] makerbot does this...but does it do anything??
+            AppendMoveTo(pos, 3000, "Retract 2?");
 		}
 
-		double extruderA;
-		public double ExtruderA 
-		{
-			get { return extruderA; }
-		}
-
-		bool in_retract;
-		double retractA;
-		public bool InRetract
-		{
-			get { return in_retract; }
-		}
-
-		bool in_travel;
-		public bool InTravel 
-		{
-			get { return in_travel; }
-		}
-
-
-
-		public virtual void AppendMoveTo(Vector3d pos, double f, string comment = null) {
-			AppendMoveTo(pos.x, pos.y, pos.z, f, comment);
-		}
-		public virtual void AppendMoveTo(double x, double y, double z, double f, string comment = null) {
-			Builder.BeginGLine(1, comment).
-			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f);
-			currentPos = new Vector3d(x, y, z);
-		}
-
-		public virtual void AppendMoveToE(double x, double y, double z, double f, double e, string comment = null) {
-			Builder.BeginGLine(1, comment).
-			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f).AppendF("E",e);
-			currentPos = new Vector3d(x, y, z);
-			extruderA = e;
-		}
-
-		public virtual void AppendMoveToA(Vector3d pos, double f, double a, string comment = null) {
-			AppendMoveToA(pos.x, pos.y, pos.z, f, a, comment);
-		}
-		public virtual void AppendMoveToA(double x, double y, double z, double f, double a, string comment = null) {
-			Builder.BeginGLine(1, comment).
-			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f).AppendF("A",a);
-			currentPos = new Vector3d(x, y, z);
-			extruderA = a;
-		}
-
-
-		public virtual void BeginRetract(Vector3d pos, double f, double a) {
-			if (in_retract)
-				throw new Exception("MakerbotAssembler.BeginRetract: already in retract!");
-			if (a > extruderA)
-				throw new Exception("MakerbotAssembler.BeginRetract: retract extrudeA is forward motion!");
-
-			// [TODO] makerbot gcode disables fan here
-			//		disable fan for every tiny travel? seems pointless...
-
-			retractA = extruderA;
-			AppendMoveToA(pos, f, a, "Retract");
-			// [RMS] makerbot does this...but does it do anything??
-			AppendMoveTo(pos, 3000, "Retract 2?");
-			in_retract = true;
-		}
-
-		public virtual void EndRetract(Vector3d pos, double f, double a = -9999) {
-			if (! in_retract)
-				throw new Exception("MakerbotAssembler.EndRetract: already in retract!");
-			if (a != -9999 && MathUtil.EpsilonEqual(a, retractA, 0.0001) == false )
-				throw new Exception("MakerbotAssembler.EndRetract: restart position is not same as start of retract!");
-			if (a == -9999)
-				a = retractA;
-			AppendMoveToA(pos, f, a, "Restart");
-			in_retract = false;
+		public override void EndRetract(Vector3d pos, double feedRate, double extrudeDist = -9999, string comment = null) {
+            base.EndRetract(pos, feedRate, extrudeDist, comment);
 
 			// [TODO] re-enable fan here
 		}
 
-		public virtual void BeginTravel() {
-			if (in_travel)
-				throw new Exception("MakerbotAssembler.BeginTravel: already in travel!");
-			in_travel = true;
-		}
-
-		public virtual void EndTravel()
-		{
-			if (in_travel == false)
-				throw new Exception("MakerbotAssembler.EndTravel: not in travel!");
-			in_travel = false;
-		}
-
-		public virtual void AppendTravelTo(double x, double y, double z, double f)
-		{
-			//G1 X-7.198 Y-12.470 Z0.200 F1500 A1.85684; Retract
-			//G1 X-7.198 Y-12.470 Z0.200 F3000; Retract
-			//G1 X-7.399 Y-12.818 Z0.200 F9000; Travel Move
-			//G1 X-7.399 Y-12.818 Z0.200 F1500 A3.15684; Restart
-		}
 
 
-		public virtual void UpdateProgress(int i) {
+
+        public override void UpdateProgress(int i) {
 			Builder.BeginMLine(73).AppendI("P",i);
 		}
 
 
-		public virtual void EnableFan() {
+		public override void EnableFan() {
 			Builder.BeginMLine(126).AppendI("T",0);
 		}
-		public virtual void DisableFan() {
+		public override void DisableFan() {
 			Builder.BeginMLine(127).AppendI("T",0);
 		}
 
@@ -153,9 +55,7 @@ namespace gs
 
 
 
-
-
-		public void AppendHeader() {
+		public override void AppendHeader() {
 			AppendHeader_Replicator2();
 		}
 		void AppendHeader_Replicator2() {
@@ -260,7 +160,7 @@ namespace gs
 
 
 
-		public void AppendFooter() {
+		public override void AppendFooter() {
 			AppendFooter_Replicator2();
 		}
 		void AppendFooter_Replicator2() {
