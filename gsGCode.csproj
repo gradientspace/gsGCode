@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="builders\BaseDepositionAssembler.cs" />
+    <Compile Include="assemblers\BaseDepositionAssembler.cs" />
     <Compile Include="GCodeFile.cs" />
     <Compile Include="interpreters\BiesseInterpreter.cs" />
     <Compile Include="interpreters\GCodeInterpreter.cs" />
@@ -55,7 +55,7 @@
     <Compile Include="builders\IGCodeAccumulator.cs" />
     <Compile Include="builders\GCodeFileAccumulator.cs" />
     <Compile Include="builders\GCodeBuilder.cs" />
-    <Compile Include="builders\MakerbotAssembler.cs" />
+    <Compile Include="assemblers\MakerbotAssembler.cs" />
     <Compile Include="settings\AdditiveSettings.cs" />
     <Compile Include="settings\MakerbotSettings.cs" />
     <Compile Include="interpreters\GCodeToPlanarComplex.cs" />
