@@ -18,6 +18,11 @@ namespace gs
     {
 		public Monoprice.Models Model;
 
+        public override AssemblerFactoryF AssemblerType() {
+            return RepRapAssembler.Factory;
+        }
+
+
 		public MonopriceSettings(Monoprice.Models model) {
 			Model = model;
 

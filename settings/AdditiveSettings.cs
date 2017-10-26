@@ -1,6 +1,4 @@
-﻿﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿﻿using System;
 using g3;
 
 namespace gs
@@ -46,6 +44,13 @@ namespace gs
 
 	public class SingleMaterialFFFSettings : PlanarAdditiveSettings
 	{
+        // This is a bit of an odd place for this, but settings are where we actually
+        // know what assembler we should be using...
+        public virtual AssemblerFactoryF AssemblerType() {
+            throw new NotImplementedException("Settings.AssemblerType() not provided");
+        }
+
+
         public MachineInfo Machine = new MachineInfo();
 
         public int ExtruderTempC = 210;
@@ -121,6 +126,10 @@ namespace gs
     // just for naming...
     public class RepRapSettings : SingleMaterialFFFSettings
     {
+        public override AssemblerFactoryF AssemblerType() {
+            return RepRapAssembler.Factory;
+        }
+
     }
 
 }

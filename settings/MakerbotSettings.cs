@@ -16,10 +16,13 @@ namespace gs
 
 	public class MakerbotSettings : SingleMaterialFFFSettings
 	{
-		public Makerbot.Models Model;
+        public Makerbot.Models Model;
 
+        public override AssemblerFactoryF AssemblerType() {
+            return MakerbotAssembler.Factory;
+        }
 
-		public MakerbotSettings() {
+        public MakerbotSettings() {
 			Model = Makerbot.Models.Replicator2;
 
             Machine.ManufacturerName = "Makerbot";
