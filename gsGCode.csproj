@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="assemblers\BaseDepositionAssembler.cs" />
+    <Compile Include="assemblers\RepRapAssembler.cs" />
     <Compile Include="GCodeFile.cs" />
     <Compile Include="interpreters\BiesseInterpreter.cs" />
     <Compile Include="interpreters\GCodeInterpreter.cs" />

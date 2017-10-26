@@ -21,6 +21,10 @@ namespace gs
 
 		public MakerbotSettings() {
 			Model = Makerbot.Models.Replicator2;
+
+            Machine.ManufacturerName = "Makerbot";
+            Machine.ModelIdentifier = "Replicator 2";
+
 			BedSizeMM = new Vector2d(100,100);
 			MaxHeightMM = 100;
 

@@ -5,8 +5,11 @@ using g3;
 
 namespace gs
 {
-    public class MachineLimits
+    public class MachineInfo
     {
+        public string ManufacturerName = "Unknown";
+        public string ModelIdentifier = "Machine";
+
         public int MinExtruderTempC = 20;
         public int MaxExtruderTempC = 230;
 
@@ -43,7 +46,7 @@ namespace gs
 
 	public class SingleMaterialFFFSettings : PlanarAdditiveSettings
 	{
-        public MachineLimits Limits = new MachineLimits();
+        public MachineInfo Machine = new MachineInfo();
 
         public int ExtruderTempC = 210;
         public int HeatedBedTempC = 0;
@@ -111,5 +114,13 @@ namespace gs
 
         public Interval1i LayerRangeFilter = new Interval1i(0, 999999999);   // only compute slices in this range
 	}
+
+
+
+
+    // just for naming...
+    public class RepRapSettings : SingleMaterialFFFSettings
+    {
+    }
 
 }

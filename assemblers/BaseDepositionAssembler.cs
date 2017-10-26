@@ -12,6 +12,9 @@ namespace gs
 	}
 
 
+    public delegate BaseDepositionAssembler AssemblerFactoryF(GCodeBuilder builder, SingleMaterialFFFSettings settings);
+
+
 	public abstract class BaseDepositionAssembler : IDepositionAssembler
 	{
 		public GCodeBuilder Builder;

@@ -8,33 +8,27 @@ using gs;
 namespace gs
 {
 
-	public class MakerbotAssembler : BaseDepositionAssembler
+	public class RepRapAssembler : BaseDepositionAssembler
     {
         public static BaseDepositionAssembler Factory(GCodeBuilder builder, SingleMaterialFFFSettings settings) {
-            return new MakerbotAssembler(builder, settings);
+            return new RepRapAssembler(builder, settings);
         }
 
 
-		public MakerbotSettings Settings;
+		public SingleMaterialFFFSettings Settings;
 
 
-		public MakerbotAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder)
+		public RepRapAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder)
         {
-            if (settings is MakerbotSettings == false)
-                throw new Exception("MakerbotAssembler: incorrect settings type!");
-
-            Settings = settings as MakerbotSettings;
+			Settings = settings;
 		}
 
 
 		public override void BeginRetract(Vector3d pos, double feedRate, double extrudeDist, string comment = null) {
-            // [TODO] makerbot gcode disables fan here
-            //		disable fan for every tiny travel? seems pointless...
-
             base.BeginRetract(pos, feedRate, extrudeDist, comment);
 
             // [RMS] makerbot does this...but does it do anything??
-            AppendMoveTo(pos, 3000, "Retract 2?");
+            //AppendMoveTo(pos, 3000, "Retract 2?");
 		}
 
 		public override void EndRetract(Vector3d pos, double feedRate, double extrudeDist = -9999, string comment = null) {
@@ -44,18 +38,16 @@ namespace gs
 		}
 
 
-
-
         public override void UpdateProgress(int i) {
-			Builder.BeginMLine(73).AppendI("P",i);
+			//Builder.BeginMLine(73).AppendI("P",i);
 		}
 
 
 		public override void EnableFan() {
-			Builder.BeginMLine(126).AppendI("T",0);
+			//Builder.BeginMLine(126).AppendI("T",0);
 		}
 		public override void DisableFan() {
-			Builder.BeginMLine(127).AppendI("T",0);
+			//Builder.BeginMLine(127).AppendI("T",0);
 		}
 
 
@@ -64,12 +56,12 @@ namespace gs
 
 
 		public override void AppendHeader() {
-			AppendHeader_Replicator2();
+			AppendHeader_StandardRepRap();
 		}
-		void AppendHeader_Replicator2() {
+		void AppendHeader_StandardRepRap() {
 
 			Builder.AddCommentLine("; Print Settings");
-			Builder.AddCommentLine("; Model: Makerbot " + Settings.Model.ToString());
+			Builder.AddCommentLine("; Model: " + Settings.Machine.ManufacturerName + " " + Settings.Machine.ModelIdentifier);
 			Builder.AddCommentLine("; Layer Height: " + Settings.LayerHeightMM);
 			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.NozzleDiamMM + "  Filament Diameter: " + Settings.FilamentDiamMM);
 			Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC);
@@ -169,22 +161,16 @@ namespace gs
 
 
 		public override void AppendFooter() {
-			AppendFooter_Replicator2();
+			AppendFooter_StandardRepRap();
 		}
-		void AppendFooter_Replicator2() {
+		void AppendFooter_StandardRepRap() {
 			double MaxHeight = 155;
 
 			Builder.AddCommentLine("End of print");
 
-            // final retract
-            if (InRetract == false) {
-                BeginRetract(NozzlePosition, Settings.RetractSpeed,
-                                        ExtruderA - Settings.RetractDistanceMM, "Final Retract");
-            }
+			//G1 X-9.119 Y10.721 Z0.200 F1500 A61.36007; Retract
 
-            //G1 X-9.119 Y10.721 Z0.200 F1500 A61.36007; Retract
-
-            Builder.BeginMLine(127, "(Fan Off)").AppendI("T",0);
+			Builder.BeginMLine(127, "(Fan Off)").AppendI("T",0);
 			Builder.BeginMLine(18, "(Turn off A and B Steppers)").AppendL("A").AppendL("B");
 
 			// move bed to max height
