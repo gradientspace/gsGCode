@@ -58,7 +58,9 @@ namespace gs
 			Builder.BeginMLine(127).AppendI("T",0);
 		}
 
-
+		public override void ShowMessage(string s) {
+			// do nothing (not available)
+		}
 
 
 

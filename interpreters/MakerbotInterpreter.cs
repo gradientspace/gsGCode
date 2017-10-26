@@ -268,7 +268,7 @@ namespace gs
             GCodeMap[92] = set_position;                // http://reprap.org/wiki/G-code#G92:_Set_Position
 
 
-            MCodeMap[82] = set_relative_extruder;       // http://reprap.org/wiki/G-code#M83:_Set_extruder_to_relative_mode
+			MCodeMap[82] = set_absolute_extruder;       // http://reprap.org/wiki/G-code#M83:_Set_extruder_to_relative_mode
             MCodeMap[83] = set_relative_extruder;       // http://reprap.org/wiki/G-code#M83:_Set_extruder_to_relative_mode
         }
 

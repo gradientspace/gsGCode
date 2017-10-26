@@ -22,9 +22,24 @@ namespace gs
         public enum ExtrudeParamType {
             ExtrudeParamA, ExtrudeParamE
         }
-        ExtrudeParamType ExtrudeParam = ExtrudeParamType.ExtrudeParamE;
 
-        public BaseDepositionAssembler(GCodeBuilder useBuilder) {
+		/// <summary>
+		/// Different machines use A or E for the extrude parameter
+		/// </summary>
+        public ExtrudeParamType ExtrudeParam = ExtrudeParamType.ExtrudeParamE;
+
+		/// <summary>
+		/// To keep things simple, we use the absolute coordinates of the slice polygons
+		/// at the higher levels. However the printer often operates in some other coordinate
+		/// system, for example relative to front-left corner. PositionShift is added to all x/y
+		/// coordinates before they are passed to the GCodeBuilder.
+		/// </summary>
+		public Vector2d PositionShift = Vector2d.Zero;
+
+
+
+        public BaseDepositionAssembler(GCodeBuilder useBuilder) 
+		{
 			Builder = useBuilder;
 			currentPos = Vector3d.Zero;
 			extruderA = 0;
@@ -37,12 +52,27 @@ namespace gs
 
         public abstract void AppendHeader();
         public abstract void AppendFooter();
-        public abstract void UpdateProgress(int i);
         public abstract void EnableFan();
         public abstract void DisableFan();
+		public abstract void UpdateProgress(int i);
+		public abstract void ShowMessage(string s);
+
+
+		/*
+		 * These seem standard enough that we will provide a default implementation
+		 */
+		public virtual void SetExtruderTargetTempAndWait(int temp, string comment = "set extruder temp C") 
+		{
+			Builder.BeginMLine(109, comment).AppendI("S", temp);
+		}
+		public virtual void SetBedTargetTempAndWait(int temp, string comment = "set bed temp C") 
+		{
+			Builder.BeginMLine(190, "set bed temp").AppendI("S", temp);			
+		}
+
 
         /*
-         * Internals
+         * Position commands
          */
 
 
@@ -73,9 +103,12 @@ namespace gs
 
 
 
-		public virtual void AppendMoveTo(double x, double y, double z, double f, string comment = null) {
+		public virtual void AppendMoveTo(double x, double y, double z, double f, string comment = null) 
+		{
+			double write_x = x + PositionShift.x;
+			double write_y = y + PositionShift.y;
 			Builder.BeginGLine(1, comment).
-			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f);
+			       AppendF("X",write_x).AppendF("Y",write_y).AppendF("Z",z).AppendF("F",f);
 			currentPos = new Vector3d(x, y, z);
 		}
         public virtual void AppendMoveTo(Vector3d pos, double f, string comment = null)
@@ -94,9 +127,12 @@ namespace gs
 
 
 
-        protected virtual void AppendMoveToE(double x, double y, double z, double f, double e, string comment = null) {
+        protected virtual void AppendMoveToE(double x, double y, double z, double f, double e, string comment = null) 
+		{
+			double write_x = x + PositionShift.x;
+			double write_y = y + PositionShift.y;	
 			Builder.BeginGLine(1, comment).
-			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f).AppendF("E",e);
+			       AppendF("X",write_x).AppendF("Y",write_y).AppendF("Z",z).AppendF("F",f).AppendF("E",e);
 			currentPos = new Vector3d(x, y, z);
 			extruderA = e;
 		}
@@ -106,9 +142,12 @@ namespace gs
         }
 
 
-        protected virtual void AppendMoveToA(double x, double y, double z, double f, double a, string comment = null) {
+        protected virtual void AppendMoveToA(double x, double y, double z, double f, double a, string comment = null) 
+		{
+			double write_x = x + PositionShift.x;
+			double write_y = y + PositionShift.y;				
 			Builder.BeginGLine(1, comment).
-			       AppendF("X",x).AppendF("Y",y).AppendF("Z",z).AppendF("F",f).AppendF("A",a);
+			       AppendF("X",write_x).AppendF("Y",write_y).AppendF("Z",z).AppendF("F",f).AppendF("A",a);
 			currentPos = new Vector3d(x, y, z);
 			extruderA = a;
 		}

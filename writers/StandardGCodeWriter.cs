@@ -8,6 +8,15 @@ namespace gs
 {
 	public class StandardGCodeWriter : BaseGCodeWriter 
 	{
+		int float_precision = 5;
+		string float_format = "{0:0.#####}";
+		public int FloatPrecision {
+			get { return float_precision; }
+			set { float_precision = value; 
+				  float_format = "{0:0." + new String('#',float_precision) + "}"; 
+			}
+		}
+
 
 		public override void WriteLine(GCodeLine line, StreamWriter outStream) 
 		{
@@ -43,7 +52,7 @@ namespace gs
 						b.Append(' ');
 					} else if ( p.type == GCodeParam.PType.DoubleValue ) {
 						b.Append(p.identifier);
-						b.Append(p.doubleValue);
+						b.AppendFormat(float_format, p.doubleValue);
 						b.Append(' ');
 					} else if ( p.type == GCodeParam.PType.TextValue) {
 						b.Append(p.identifier);
