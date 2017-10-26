@@ -58,16 +58,25 @@ namespace gs
 		public abstract void ShowMessage(string s);
 
 
-		/*
+        /*
 		 * These seem standard enough that we will provide a default implementation
 		 */
-		public virtual void SetExtruderTargetTempAndWait(int temp, string comment = "set extruder temp C") 
+        public virtual void SetExtruderTargetTemp(int temp, string comment = "set extruder temp C")
+        {
+            Builder.BeginMLine(104, comment).AppendI("S", temp);
+        }
+        public virtual void SetExtruderTargetTempAndWait(int temp, string comment = "set extruder temp C, and wait") 
 		{
 			Builder.BeginMLine(109, comment).AppendI("S", temp);
 		}
-		public virtual void SetBedTargetTempAndWait(int temp, string comment = "set bed temp C") 
+
+        public virtual void SetBedTargetTemp(int temp, string comment = "set bed temp C")
+        {
+            Builder.BeginMLine(140, comment).AppendI("S", temp);
+        }
+        public virtual void SetBedTargetTempAndWait(int temp, string comment = "set bed temp C, and wait") 
 		{
-			Builder.BeginMLine(190, "set bed temp").AppendI("S", temp);			
+			Builder.BeginMLine(190, comment).AppendI("S", temp);			
 		}
 
 
@@ -158,6 +167,10 @@ namespace gs
 
 
 
+        public virtual void BeginRetractRelativeDist(Vector3d pos, double feedRate, double extrudeDelta, string comment = null)
+        {
+            BeginRetract(pos, feedRate, ExtruderA + extrudeDelta, comment);
+        }
         public virtual void BeginRetract(Vector3d pos, double feedRate, double extrudeDist, string comment = null) {
 			if (in_retract)
 				throw new Exception("BaseDepositionAssembler.BeginRetract: already in retract!");
@@ -165,8 +178,8 @@ namespace gs
 				throw new Exception("BaseDepositionAssembler.BeginRetract: retract extrudeA is forward motion!");
 
 			retractA = extruderA;
-			AppendMoveToA(pos, feedRate, extrudeDist, (comment == null) ? "Retract" : comment);
-			in_retract = true;
+            AppendExtrudeTo(pos, feedRate, extrudeDist, (comment == null) ? "Retract" : comment);
+            in_retract = true;
 		}
 
 
@@ -177,7 +190,7 @@ namespace gs
 				throw new Exception("BaseDepositionAssembler.EndRetract: restart position is not same as start of retract!");
 			if (extrudeDist == -9999)
 				extrudeDist = retractA;
-			AppendMoveToA(pos, feedRate, extrudeDist, (comment == null) ? "Restart" : comment);
+            AppendExtrudeTo(pos, feedRate, extrudeDist, (comment == null) ? "End Retract" : comment);
 			in_retract = false;
 		}
 

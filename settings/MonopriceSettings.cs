@@ -41,7 +41,7 @@ namespace gs
             Machine.MaxExtrudeSpeedMMM = 55 * 60;
             Machine.MaxTravelSpeedMMM = 150 * 60;
             Machine.MaxZTravelSpeedMMM = 100 * 60;
-            Machine.MaxRetractSpeedMMM = 40 * 60;
+            Machine.MaxRetractSpeedMMM = 100 * 60;
             Machine.MinLayerHeightMM = 0.1;
             Machine.MaxLayerHeightMM = 0.3;
 
@@ -49,8 +49,8 @@ namespace gs
             MaxHeightMM = 120;
             LayerHeightMM = 0.2;
 
-            ExtruderTempC = 210;
-            HeatedBedTempC = 30;
+            ExtruderTempC = 200;
+            HeatedBedTempC = 0;
 
             NozzleDiamMM = 0.4;
             FilamentDiamMM = 1.75;

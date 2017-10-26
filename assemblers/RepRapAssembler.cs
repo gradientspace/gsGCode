@@ -24,13 +24,13 @@ namespace gs
 		}
 
 
-		public override void BeginRetract(Vector3d pos, double feedRate, double extrudeDist, string comment = null) {
-            base.BeginRetract(pos, feedRate, extrudeDist, comment);
-		}
+		//public override void BeginRetract(Vector3d pos, double feedRate, double extrudeDist, string comment = null) {
+  //          base.BeginRetract(pos, feedRate, extrudeDist, comment);
+		//}
 
-		public override void EndRetract(Vector3d pos, double feedRate, double extrudeDist = -9999, string comment = null) {
-            base.EndRetract(pos, feedRate, extrudeDist, comment);
-		}
+		//public override void EndRetract(Vector3d pos, double feedRate, double extrudeDist = -9999, string comment = null) {
+  //          base.EndRetract(pos, feedRate, extrudeDist, comment);
+		//}
 
 
         public override void UpdateProgress(int i) {
@@ -96,23 +96,35 @@ namespace gs
 			Builder.BeginGLine(28, "home z").AppendI("Z", 0);
 			currentPos.z = 0;
 
-			Builder.BeginGLine(1, "move platform down").AppendF("Z", 15).AppendI("F", 9000);
-			currentPos.z = 15;
 
-			Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
-			extruderA = 0;
-			Builder.BeginGLine(1, "extrude blob").AppendI("F", 200).AppendI("E", 3);
-			Builder.BeginGLine(92, "reset extruded length again").AppendI("E", 0);
-			extruderA = 0;
-			Builder.BeginGLine(1, "reset speed").AppendI("F", 9000);
+            double PrimeHeight = 0.27;
+            double PrimeExtrudePerMM_1p75 = 0.1;
+            double PrimeFeedRate = 1800;
+            Vector3d frontRight = new Vector3d(Settings.BedSizeMM.x / 2, -Settings.BedSizeMM.y / 2, PrimeHeight);
+            frontRight.x -= 10;
+            frontRight.y += 5;
+            Vector3d frontLeft = frontRight; frontLeft.x = -frontRight.x;
+            Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
+            AppendMoveTo(frontRight, 9000, "start prime");
+            double feed_amount = PrimeExtrudePerMM_1p75 * frontRight.Distance(frontLeft);
+            AppendExtrudeTo(frontLeft, PrimeFeedRate, feed_amount, "prime");
 
-			// move to z=0
-			Builder.BeginGLine(1).AppendI("Z", 0).AppendI("F", 9000);
+
+            // [RMS] this does not extrude very much and does not seem to work?
+            //Builder.BeginGLine(1, "move platform down").AppendF("Z", 15).AppendI("F", 9000);
+            //currentPos.z = 15;
+            //Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
+            //extruderA = 0;
+            //Builder.BeginGLine(1, "extrude blob").AppendI("F", 200).AppendI("E", 3);
+            //Builder.BeginGLine(92, "reset extruded length again").AppendI("E", 0);
+            //extruderA = 0;
+            //Builder.BeginGLine(1, "reset speed").AppendI("F", 9000);
+
+            // move to z=0
+            Builder.BeginGLine(1).AppendI("Z", 0).AppendI("F", 9000);
 			currentPos.z = 0;
 
 			ShowMessage("Print Started");
-
-			Builder.BeginMLine(136, "(enable build)");
 
 			in_retract = false;
 			in_travel = false;
@@ -128,34 +140,26 @@ namespace gs
 			AppendFooter_StandardRepRap();
 		}
 		void AppendFooter_StandardRepRap() {
-			double MaxHeight = 155;
 
-			Builder.AddCommentLine("End of print");
+            UpdateProgress(100);
 
-			//G1 X-9.119 Y10.721 Z0.200 F1500 A61.36007; Retract
+            Builder.AddCommentLine("End of print");
+            ShowMessage("Done!");
 
-			Builder.BeginMLine(127, "(Fan Off)").AppendI("T",0);
-			Builder.BeginMLine(18, "(Turn off A and B Steppers)").AppendL("A").AppendL("B");
+            DisableFan();
+            SetExtruderTargetTemp(0, "extruder off");
+            SetBedTargetTemp(0, "bed off");
 
-			// move bed to max height
-			Builder.BeginGLine(1).AppendF("Z",MaxHeight).AppendI("F",900);
+            BeginRetractRelativeDist(currentPos, 300, -1, "final retract");
 
-			// home steppers and turn off
-			Builder.BeginGLine(162).AppendL("X").AppendL("Y").AppendI("F", 2000);
-			Builder.BeginMLine(18,"(Turn off steppers)").AppendL("X").AppendL("Y").AppendL("Z");
+            Vector3d zup = currentPos;
+            zup.z = Math.Min(Settings.MaxHeightMM, zup.z + 50);
+            AppendMoveToE(zup, 9000, ExtruderA - 5.0, "move up and retract");
 
-			// set temp to 0
-			Builder.BeginMLine(104).AppendI("S",0).AppendI("T",0);
+            Builder.BeginGLine(28, "home x/y").AppendI("X", 0).AppendI("Y", 0);
+            currentPos.x = currentPos.y = 0;
 
-			// set built-in status message
-			Builder.BeginMLine(70, "(We <3 Making Things!)").AppendI("P",5);
-
-			// skip song
-			//Builder.BeginMLine(72).AppendI("P",1);
-
-			UpdateProgress(100);
-
-			Builder.BeginMLine(137,"(build end notification)");
+            Builder.BeginMLine(84, "turn off steppers");
 
 			Builder.EndLine();		// need to force this
 		}
