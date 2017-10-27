@@ -110,7 +110,7 @@ namespace gs
          * Toolpath filtering options
          */
         public bool ClipSelfOverlaps = false;            // if true, try to remove portions of toolpaths that will self-overlap
-        public double SelfOverlapToleranceX = 0.75;      // what counts as 'self-overla'. this is a multiplier on NozzleDiamMM
+        public double SelfOverlapToleranceX = 0.75;      // what counts as 'self-overlap'. this is a multiplier on NozzleDiamMM
 
 
         /*
@@ -124,7 +124,7 @@ namespace gs
 
 
     // just for naming...
-    public class RepRapSettings : SingleMaterialFFFSettings
+    public class GenericRepRapSettings : SingleMaterialFFFSettings
     {
         public override AssemblerFactoryF AssemblerType() {
             return RepRapAssembler.Factory;

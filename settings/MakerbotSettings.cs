@@ -8,6 +8,7 @@ namespace gs
 	public static class Makerbot
 	{
 		public enum Models {
+            Unknown,
 			Replicator2
 		};
 
@@ -22,20 +23,18 @@ namespace gs
             return MakerbotAssembler.Factory;
         }
 
-        public MakerbotSettings() {
-			Model = Makerbot.Models.Replicator2;
+        public MakerbotSettings(Makerbot.Models model = Makerbot.Models.Replicator2) {
+			Model = model;
 
             Machine.ManufacturerName = "Makerbot";
-            Machine.ModelIdentifier = "Replicator 2";
+            Machine.ModelIdentifier = model.ToString();
 
-			BedSizeMM = new Vector2d(100,100);
-			MaxHeightMM = 100;
+			BedSizeMM = new Vector2d(285, 153);
+			MaxHeightMM = 155;
 
 			ExtruderTempC = 230;
 			NozzleDiamMM = 0.4;
 			FilamentDiamMM = 1.75;
-
-
 
 		}
 	}

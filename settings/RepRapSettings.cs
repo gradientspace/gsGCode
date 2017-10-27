@@ -5,48 +5,48 @@ using g3;
 
 namespace gs
 {
-	public static class Monoprice
+	public static class RepRap
 	{
 		public enum Models {
-            MP_Select_Mini_V2
+            Unknown
         };
 
 	}
 
 
-	public class MonopriceSettings : GenericRepRapSettings
+	public class RepRapSettings : GenericRepRapSettings
     {
-		public Monoprice.Models Model;
+		public RepRap.Models Model;
 
         public override AssemblerFactoryF AssemblerType() {
             return RepRapAssembler.Factory;
         }
 
 
-		public MonopriceSettings(Monoprice.Models model) {
+		public RepRapSettings(RepRap.Models model) {
 			Model = model;
 
-            if (model == Monoprice.Models.MP_Select_Mini_V2)
-                configure_MP_Select_Mini_V2();
+            if (model == RepRap.Models.Unknown)
+                configure_unknown();
         }
 
 
-        void configure_MP_Select_Mini_V2()
+        void configure_unknown()
         {
-            Machine.ManufacturerName = "Monoprice";
-            Machine.ModelIdentifier = "MP Select Mini V2";
-            Machine.MaxExtruderTempC = 250;
-            Machine.HasHeatedBed = true;
+            Machine.ManufacturerName = "RepRap";
+            Machine.ModelIdentifier = "Unknown";
+            Machine.MaxExtruderTempC = 230;
+            Machine.HasHeatedBed = false;
             Machine.MaxBedTempC = 60;
-            Machine.MaxExtrudeSpeedMMM = 55 * 60;
+            Machine.MaxExtrudeSpeedMMM = 50 * 60;
             Machine.MaxTravelSpeedMMM = 150 * 60;
             Machine.MaxZTravelSpeedMMM = 100 * 60;
-            Machine.MaxRetractSpeedMMM = 100 * 60;
+            Machine.MaxRetractSpeedMMM = 40 * 60;
             Machine.MinLayerHeightMM = 0.1;
             Machine.MaxLayerHeightMM = 0.3;
 
-            BedSizeMM = new Vector2d(120, 120);
-            MaxHeightMM = 120;
+            BedSizeMM = new Vector2d(80, 80);
+            MaxHeightMM = 55;
             LayerHeightMM = 0.2;
 
             ExtruderTempC = 200;
