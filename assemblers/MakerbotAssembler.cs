@@ -76,8 +76,6 @@ namespace gs
 			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
 			Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC);
 
-			double LayerHeight = Settings.LayerHeightMM;
-
 			Vector2d BackRight = new Vector2d(152,75);
 			Vector2d FrontLeft = new Vector2d(-141,-74);
 

@@ -67,15 +67,6 @@ namespace gs
 			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
 			Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC + " Bed Temp: " + Settings.HeatedBedTempC);
 
-			double LayerHeight = Settings.LayerHeightMM;
-
-			//Vector2d BackRight = new Vector2d(152,75);
-			//Vector2d FrontLeft = new Vector2d(-141,-74);
-
-			//Vector2d PrimeFrontRight = new Vector2d(105.4, -74);
-			//double PrimeHeight = 0.270;
-
-
 			// M109
 			SetExtruderTargetTempAndWait(Settings.ExtruderTempC);
 
