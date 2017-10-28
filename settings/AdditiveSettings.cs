@@ -3,10 +3,40 @@ using g3;
 
 namespace gs
 {
+    public enum MachineClass
+    {
+        Unknown,
+        PlasticFFFPrinter,
+        MetalSLSPrinter
+    }
+
+
     public class MachineInfo
     {
         public string ManufacturerName = "Unknown";
         public string ModelIdentifier = "Machine";
+        public MachineClass Class = MachineClass.Unknown;
+
+        public Vector2d BedSizeMM = new Vector2d(100, 100);
+        public double MaxHeightMM = 100;
+    }
+
+
+
+    public class FFFMachineInfo : MachineInfo
+    {
+        /*
+         * printer mechanics
+         */
+        public double NozzleDiamMM = 0.4;
+        public double FilamentDiamMM = 1.75;
+
+        public double MinLayerHeightMM = 0.2;
+        public double MaxLayerHeightMM = 0.2;
+
+        /*
+         * Temperatures
+         */
 
         public int MinExtruderTempC = 20;
         public int MaxExtruderTempC = 230;
@@ -15,9 +45,6 @@ namespace gs
         public int MinBedTempC = 0;
         public int MaxBedTempC = 0;
 
-        public double MinLayerHeightMM = 0.2;
-        public double MaxLayerHeightMM = 0.2;
-
         /*
          * All units are mm/min = (mm/s * 60)
          */
@@ -25,16 +52,13 @@ namespace gs
         public int MaxTravelSpeedMMM = 100 * 60;
         public int MaxZTravelSpeedMMM = 20 * 60;
         public int MaxRetractSpeedMMM = 20 * 60;
-
-        public double FilamentDiamenterMM = 1.75;
     }
 
 
 
-    public class PlanarAdditiveSettings
+    public abstract class PlanarAdditiveSettings
 	{
-		public Vector2d BedSizeMM = new Vector2d(100,100);
-		public double MaxHeightMM = 100;
+        public abstract MachineInfo BaseMachine { get; set; }
 
 		public double LayerHeightMM = 0.2;
 
@@ -50,8 +74,25 @@ namespace gs
             throw new NotImplementedException("Settings.AssemblerType() not provided");
         }
 
+        protected FFFMachineInfo machineInfo;
+        public FFFMachineInfo Machine {
+            get { if (machineInfo == null) machineInfo = new FFFMachineInfo(); return machineInfo; }
+            set { machineInfo = value; }
+        }
 
-        public MachineInfo Machine = new MachineInfo();
+
+        public override MachineInfo BaseMachine {
+            get { return Machine; }
+            set { if (value is FFFMachineInfo)
+                    machineInfo = value as FFFMachineInfo;
+                 else
+                    throw new Exception("SingleMaterialFFFSettings.Machine.set: type is not FFFMachineInfo!");
+            }
+        }
+
+        /*
+         * Temperatures
+         */
 
         public int ExtruderTempC = 210;
         public int HeatedBedTempC = 0;
@@ -60,9 +101,6 @@ namespace gs
 		 * Distances.
 		 * All units are mm
 		 */
-
-		public double NozzleDiamMM = 0.4;
-		public double FilamentDiamMM = 1.75;
 
 		public double FillPathSpacingMM = 0.4;
 

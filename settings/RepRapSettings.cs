@@ -35,9 +35,16 @@ namespace gs
         {
             Machine.ManufacturerName = "RepRap";
             Machine.ModelIdentifier = "Unknown";
+            Machine.Class = MachineClass.PlasticFFFPrinter;
+            Machine.BedSizeMM = new Vector2d(80, 80);
+            Machine.MaxHeightMM = 55;
+            Machine.NozzleDiamMM = 0.4;
+            Machine.FilamentDiamMM = 1.75;
+
             Machine.MaxExtruderTempC = 230;
             Machine.HasHeatedBed = false;
             Machine.MaxBedTempC = 60;
+
             Machine.MaxExtrudeSpeedMMM = 50 * 60;
             Machine.MaxTravelSpeedMMM = 150 * 60;
             Machine.MaxZTravelSpeedMMM = 100 * 60;
@@ -45,15 +52,11 @@ namespace gs
             Machine.MinLayerHeightMM = 0.1;
             Machine.MaxLayerHeightMM = 0.3;
 
-            BedSizeMM = new Vector2d(80, 80);
-            MaxHeightMM = 55;
             LayerHeightMM = 0.2;
 
             ExtruderTempC = 200;
             HeatedBedTempC = 0;
 
-            NozzleDiamMM = 0.4;
-            FilamentDiamMM = 1.75;
             FillPathSpacingMM = 0.4;
             RetractDistanceMM = 4.5;
 

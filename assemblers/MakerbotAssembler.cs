@@ -73,7 +73,7 @@ namespace gs
 			Builder.AddCommentLine("; Print Settings");
 			Builder.AddCommentLine("; Model: Makerbot " + Settings.Model.ToString());
 			Builder.AddCommentLine("; Layer Height: " + Settings.LayerHeightMM);
-			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.NozzleDiamMM + "  Filament Diameter: " + Settings.FilamentDiamMM);
+			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
 			Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC);
 
 			double LayerHeight = Settings.LayerHeightMM;

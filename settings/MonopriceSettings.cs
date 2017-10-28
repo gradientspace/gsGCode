@@ -35,9 +35,16 @@ namespace gs
         {
             Machine.ManufacturerName = "Monoprice";
             Machine.ModelIdentifier = "MP Select Mini V2";
+            Machine.Class = MachineClass.PlasticFFFPrinter;
+            Machine.BedSizeMM = new Vector2d(120, 120);
+            Machine.MaxHeightMM = 120;
+            Machine.NozzleDiamMM = 0.4;
+            Machine.FilamentDiamMM = 1.75;
+
             Machine.MaxExtruderTempC = 250;
             Machine.HasHeatedBed = true;
             Machine.MaxBedTempC = 60;
+
             Machine.MaxExtrudeSpeedMMM = 55 * 60;
             Machine.MaxTravelSpeedMMM = 150 * 60;
             Machine.MaxZTravelSpeedMMM = 100 * 60;
@@ -45,15 +52,12 @@ namespace gs
             Machine.MinLayerHeightMM = 0.1;
             Machine.MaxLayerHeightMM = 0.3;
 
-            BedSizeMM = new Vector2d(120, 120);
-            MaxHeightMM = 120;
+
             LayerHeightMM = 0.2;
 
             ExtruderTempC = 200;
             HeatedBedTempC = 0;
 
-            NozzleDiamMM = 0.4;
-            FilamentDiamMM = 1.75;
             FillPathSpacingMM = 0.4;
             RetractDistanceMM = 4.5;
 

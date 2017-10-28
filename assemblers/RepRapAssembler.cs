@@ -64,7 +64,7 @@ namespace gs
 			Builder.AddCommentLine("; Print Settings");
 			Builder.AddCommentLine("; Model: " + Settings.Machine.ManufacturerName + " " + Settings.Machine.ModelIdentifier);
 			Builder.AddCommentLine("; Layer Height: " + Settings.LayerHeightMM);
-			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.NozzleDiamMM + "  Filament Diameter: " + Settings.FilamentDiamMM);
+			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
 			Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC + " Bed Temp: " + Settings.HeatedBedTempC);
 
 			double LayerHeight = Settings.LayerHeightMM;
@@ -91,7 +91,7 @@ namespace gs
 
 			Builder.BeginGLine(28, "home x/y").AppendI("X", 0).AppendI("Y", 0);
 			currentPos.x = currentPos.y = 0;
-			PositionShift = Settings.BedSizeMM * 0.5;
+			PositionShift = Settings.Machine.BedSizeMM * 0.5;
 				
 			Builder.BeginGLine(28, "home z").AppendI("Z", 0);
 			currentPos.z = 0;
@@ -100,7 +100,7 @@ namespace gs
             double PrimeHeight = 0.27;
             double PrimeExtrudePerMM_1p75 = 0.1;
             double PrimeFeedRate = 1800;
-            Vector3d frontRight = new Vector3d(Settings.BedSizeMM.x / 2, -Settings.BedSizeMM.y / 2, PrimeHeight);
+            Vector3d frontRight = new Vector3d(Settings.Machine.BedSizeMM.x / 2, -Settings.Machine.BedSizeMM.y / 2, PrimeHeight);
             frontRight.x -= 10;
             frontRight.y += 5;
             Vector3d frontLeft = frontRight; frontLeft.x = -frontRight.x;
@@ -153,7 +153,7 @@ namespace gs
             BeginRetractRelativeDist(currentPos, 300, -1, "final retract");
 
             Vector3d zup = currentPos;
-            zup.z = Math.Min(Settings.MaxHeightMM, zup.z + 50);
+            zup.z = Math.Min(Settings.Machine.MaxHeightMM, zup.z + 50);
             AppendMoveToE(zup, 9000, ExtruderA - 5.0, "move up and retract");
 
             Builder.BeginGLine(28, "home x/y").AppendI("X", 0).AppendI("Y", 0);
