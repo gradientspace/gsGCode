@@ -33,6 +33,12 @@ namespace gs.info
                 configure_MP_Select_Mini_V2();
         }
 
+        public override T CloneAs<T>() {
+            MonopriceSettings copy = new MonopriceSettings(this.ModelEnum);
+            this.CopyFieldsTo(copy);
+            return copy as T;
+        }
+
 
         void configure_MP_Select_Mini_V2()
         {

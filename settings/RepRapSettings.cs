@@ -33,6 +33,12 @@ namespace gs.info
                 configure_unknown();
         }
 
+        public override T CloneAs<T>() {
+            RepRapSettings copy = new RepRapSettings(this.ModelEnum);
+            this.CopyFieldsTo(copy);
+            return copy as T;
+        }
+
 
         void configure_unknown()
         {

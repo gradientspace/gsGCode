@@ -38,6 +38,12 @@ namespace gs.info
         }
 
 
+        public override T CloneAs<T>() {
+            MakerbotSettings copy = new MakerbotSettings(this.ModelEnum);
+            this.CopyFieldsTo(copy);
+            return copy as T;
+        }
+
 
         void configure_Replicator_2()
         {

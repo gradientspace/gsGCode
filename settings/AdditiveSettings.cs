@@ -11,7 +11,7 @@ namespace gs
     }
 
 
-    public class MachineInfo
+    public abstract class MachineInfo
     {
         protected static string UnknownUUID = "00000000-0000-0000-0000-000000000000";
 
@@ -24,6 +24,20 @@ namespace gs
         public double BedSizeXMM = 100;
         public double BedSizeYMM = 100;
         public double MaxHeightMM = 100;
+
+
+        public abstract T CloneAs<T>() where T : class;
+        protected virtual void CopyFieldsTo(MachineInfo to)
+        {
+            to.ManufacturerName = this.ManufacturerName;
+            to.ManufacturerUUID = this.ManufacturerUUID;
+            to.ModelIdentifier = this.ModelIdentifier;
+            to.ModelUUID = this.ModelUUID;
+            to.Class = this.Class;
+            to.BedSizeXMM = this.BedSizeXMM;
+            to.BedSizeYMM = this.BedSizeYMM;
+            to.MaxHeightMM = this.MaxHeightMM;
+        }
     }
 
 
@@ -57,6 +71,41 @@ namespace gs
         public int MaxTravelSpeedMMM = 100 * 60;
         public int MaxZTravelSpeedMMM = 20 * 60;
         public int MaxRetractSpeedMMM = 20 * 60;
+
+
+
+        public override T CloneAs<T>()
+        {
+            FFFMachineInfo fi = new FFFMachineInfo();
+            this.CopyFieldsTo(fi);
+            return fi as T;
+        }
+        protected virtual void CopyFieldsTo(FFFMachineInfo to)
+        {
+            base.CopyFieldsTo(to);
+
+            to.NozzleDiamMM = this.NozzleDiamMM;
+            to.FilamentDiamMM = this.FilamentDiamMM;
+            to.MinLayerHeightMM = this.MinLayerHeightMM;
+            to.MaxHeightMM = this.MaxHeightMM;
+            to.MinExtruderTempC = this.MaxExtruderTempC;
+            to.HasHeatedBed = this.HasHeatedBed;
+            to.MinBedTempC = this.MinBedTempC;
+            to.MaxBedTempC = this.MaxBedTempC;
+            to.MaxExtrudeSpeedMMM = this.MaxExtrudeSpeedMMM;
+            to.MaxTravelSpeedMMM = this.MaxTravelSpeedMMM;
+            to.MaxZTravelSpeedMMM = this.MaxZTravelSpeedMMM;
+            to.MaxRetractSpeedMMM = this.MaxRetractSpeedMMM;
+
+            to.ManufacturerName = this.ManufacturerName;
+            to.ManufacturerUUID = this.ManufacturerUUID;
+            to.ModelIdentifier = this.ModelIdentifier;
+            to.ModelUUID = this.ModelUUID;
+            to.Class = this.Class;
+            to.BedSizeXMM = this.BedSizeXMM;
+            to.BedSizeYMM = this.BedSizeYMM;
+            to.MaxHeightMM = this.MaxHeightMM;
+        }
     }
 
 
@@ -68,13 +117,21 @@ namespace gs
         /// </summary>
         public string Identifier = "Default";
 
-        public abstract MachineInfo BaseMachine { get; set; }
-
 		public double LayerHeightMM = 0.2;
 
 
         public string ClassTypeName {
             get { return GetType().ToString(); }
+        }
+
+
+        public abstract MachineInfo BaseMachine { get; set; }
+
+        public abstract T CloneAs<T>() where T : class;
+        protected virtual void CopyFieldsTo(PlanarAdditiveSettings to)
+        {
+            to.Identifier = this.Identifier;
+            to.LayerHeightMM = this.LayerHeightMM;
         }
     }
 
@@ -171,7 +228,44 @@ namespace gs
          */
 
         public Interval1i LayerRangeFilter = new Interval1i(0, 999999999);   // only compute slices in this range
-	}
+
+
+
+
+        public override T CloneAs<T>()
+        {
+            SingleMaterialFFFSettings copy = new SingleMaterialFFFSettings();
+            this.CopyFieldsTo(copy);
+            return copy as T;
+        }
+        protected virtual void CopyFieldsTo(SingleMaterialFFFSettings to)
+        {
+            base.CopyFieldsTo(to);
+            to.machineInfo = this.machineInfo.CloneAs<FFFMachineInfo>();
+
+            to.ExtruderTempC = this.ExtruderTempC;
+            to.HeatedBedTempC = this.HeatedBedTempC;
+            to.FillPathSpacingMM = this.FillPathSpacingMM;
+            to.RetractDistanceMM = this.RetractDistanceMM;
+
+            to.RetractSpeed = this.RetractSpeed;
+            to.ZTravelSpeed = this.ZTravelSpeed;
+            to.RapidTravelSpeed = this.RapidTravelSpeed;
+            to.CarefulExtrudeSpeed = this.CarefulExtrudeSpeed;
+            to.RapidExtrudeSpeed = this.RapidExtrudeSpeed;
+            to.OuterPerimeterSpeedX = this.OuterPerimeterSpeedX;
+
+            to.Shells = this.Shells;
+            to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;
+            to.RoofLayers = this.RoofLayers;
+            to.FloorLayers = this.FloorLayers;
+            to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
+            to.ClipSelfOverlaps = this.ClipSelfOverlaps;
+            to.SelfOverlapToleranceX = this.SelfOverlapToleranceX;
+            to.LayerRangeFilter = this.LayerRangeFilter;
+        }
+
+    }
 
 
 
@@ -182,6 +276,15 @@ namespace gs
         public override AssemblerFactoryF AssemblerType() {
             return RepRapAssembler.Factory;
         }
+
+
+        public override T CloneAs<T>()
+        {
+            GenericRepRapSettings copy = new GenericRepRapSettings();
+            this.CopyFieldsTo(copy);
+            return copy as T;
+        }
+        
 
     }
 
