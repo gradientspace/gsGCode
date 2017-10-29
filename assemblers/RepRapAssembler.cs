@@ -82,7 +82,7 @@ namespace gs
 
 			Builder.BeginGLine(28, "home x/y").AppendI("X", 0).AppendI("Y", 0);
 			currentPos.x = currentPos.y = 0;
-			PositionShift = Settings.Machine.BedSizeMM * 0.5;
+            PositionShift = 0.5 * new Vector2d(Settings.Machine.BedSizeXMM, Settings.Machine.BedSizeYMM);
 				
 			Builder.BeginGLine(28, "home z").AppendI("Z", 0);
 			currentPos.z = 0;
@@ -91,7 +91,7 @@ namespace gs
             double PrimeHeight = 0.27;
             double PrimeExtrudePerMM_1p75 = 0.1;
             double PrimeFeedRate = 1800;
-            Vector3d frontRight = new Vector3d(Settings.Machine.BedSizeMM.x / 2, -Settings.Machine.BedSizeMM.y / 2, PrimeHeight);
+            Vector3d frontRight = new Vector3d(Settings.Machine.BedSizeXMM / 2, -Settings.Machine.BedSizeYMM / 2, PrimeHeight);
             frontRight.x -= 10;
             frontRight.y += 5;
             Vector3d frontLeft = frontRight; frontLeft.x = -frontRight.x;

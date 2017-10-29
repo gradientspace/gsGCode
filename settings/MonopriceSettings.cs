@@ -3,20 +3,23 @@ using System.Linq;
 using System.Text;
 using g3;
 
-namespace gs
+namespace gs.info
 {
 	public static class Monoprice
 	{
-		public enum Models {
-            MP_Select_Mini_V2
+        public const string UUID = "860432eb-dec6-4b20-8f97-3643a50daf1d";
+
+        public enum Models {
+            MP_Select_Mini_V2 = 0
         };
 
-	}
+        public const string UUID_MP_Select_Mini_V2 = "4a498843-9080-4c97-aa82-b587f415ab1f";
+    }
 
 
 	public class MonopriceSettings : GenericRepRapSettings
     {
-		public Monoprice.Models Model;
+		public Monoprice.Models ModelEnum;
 
         public override AssemblerFactoryF AssemblerType() {
             return RepRapAssembler.Factory;
@@ -24,7 +27,7 @@ namespace gs
 
 
 		public MonopriceSettings(Monoprice.Models model) {
-			Model = model;
+			ModelEnum = model;
 
             if (model == Monoprice.Models.MP_Select_Mini_V2)
                 configure_MP_Select_Mini_V2();
@@ -34,9 +37,12 @@ namespace gs
         void configure_MP_Select_Mini_V2()
         {
             Machine.ManufacturerName = "Monoprice";
+            Machine.ManufacturerUUID = Monoprice.UUID;
             Machine.ModelIdentifier = "MP Select Mini V2";
+            Machine.ModelUUID = Monoprice.UUID_MP_Select_Mini_V2;
             Machine.Class = MachineClass.PlasticFFFPrinter;
-            Machine.BedSizeMM = new Vector2d(120, 120);
+            Machine.BedSizeXMM = 120;
+            Machine.BedSizeYMM = 120;
             Machine.MaxHeightMM = 120;
             Machine.NozzleDiamMM = 0.4;
             Machine.FilamentDiamMM = 1.75;
@@ -63,7 +69,7 @@ namespace gs
 
             RetractSpeed = Machine.MaxRetractSpeedMMM;
             ZTravelSpeed = Machine.MaxZTravelSpeedMMM;
-            RapidTravelSpeed = Machine.MaxZTravelSpeedMMM;
+            RapidTravelSpeed = Machine.MaxTravelSpeedMMM;
             CarefulExtrudeSpeed = 20 * 60;
             RapidExtrudeSpeed = Machine.MaxExtrudeSpeedMMM;
             OuterPerimeterSpeedX = 0.5;

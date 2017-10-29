@@ -13,11 +13,16 @@ namespace gs
 
     public class MachineInfo
     {
+        protected static string UnknownUUID = "00000000-0000-0000-0000-000000000000";
+
         public string ManufacturerName = "Unknown";
+        public string ManufacturerUUID = UnknownUUID;
         public string ModelIdentifier = "Machine";
+        public string ModelUUID = UnknownUUID;
         public MachineClass Class = MachineClass.Unknown;
 
-        public Vector2d BedSizeMM = new Vector2d(100, 100);
+        public double BedSizeXMM = 100;
+        public double BedSizeYMM = 100;
         public double MaxHeightMM = 100;
     }
 
@@ -58,21 +63,31 @@ namespace gs
 
     public abstract class PlanarAdditiveSettings
 	{
+        /// <summary>
+        /// This is the "name" of this settings (eg user identifier)
+        /// </summary>
+        public string Identifier = "Default";
+
         public abstract MachineInfo BaseMachine { get; set; }
 
 		public double LayerHeightMM = 0.2;
 
-	}
+
+        public string ClassTypeName {
+            get { return GetType().ToString(); }
+        }
+    }
 
 
 
-	public class SingleMaterialFFFSettings : PlanarAdditiveSettings
+    public class SingleMaterialFFFSettings : PlanarAdditiveSettings
 	{
         // This is a bit of an odd place for this, but settings are where we actually
         // know what assembler we should be using...
         public virtual AssemblerFactoryF AssemblerType() {
             throw new NotImplementedException("Settings.AssemblerType() not provided");
         }
+
 
         protected FFFMachineInfo machineInfo;
         public FFFMachineInfo Machine {

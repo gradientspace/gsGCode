@@ -3,20 +3,23 @@ using System.Linq;
 using System.Text;
 using g3;
 
-namespace gs
+namespace gs.info
 {
 	public static class RepRap
 	{
-		public enum Models {
-            Unknown
+        public const string UUID = "e95dcaaa-4315-412f-bd80-5049fb74f384";
+
+        public enum Models {
+            Unknown = 0
         };
 
-	}
+        public const string UUID_Unknown = "bb097486-bb07-4a95-950f-1a1de992e782";
+    }
 
 
 	public class RepRapSettings : GenericRepRapSettings
     {
-		public RepRap.Models Model;
+		public RepRap.Models ModelEnum;
 
         public override AssemblerFactoryF AssemblerType() {
             return RepRapAssembler.Factory;
@@ -24,7 +27,7 @@ namespace gs
 
 
 		public RepRapSettings(RepRap.Models model) {
-			Model = model;
+			ModelEnum = model;
 
             if (model == RepRap.Models.Unknown)
                 configure_unknown();
@@ -34,9 +37,12 @@ namespace gs
         void configure_unknown()
         {
             Machine.ManufacturerName = "RepRap";
+            Machine.ManufacturerUUID = RepRap.UUID;
             Machine.ModelIdentifier = "Unknown";
+            Machine.ModelUUID = RepRap.UUID_Unknown;
             Machine.Class = MachineClass.PlasticFFFPrinter;
-            Machine.BedSizeMM = new Vector2d(80, 80);
+            Machine.BedSizeXMM = 80;
+            Machine.BedSizeYMM = 80;
             Machine.MaxHeightMM = 55;
             Machine.NozzleDiamMM = 0.4;
             Machine.FilamentDiamMM = 1.75;
@@ -62,7 +68,7 @@ namespace gs
 
             RetractSpeed = Machine.MaxRetractSpeedMMM;
             ZTravelSpeed = Machine.MaxZTravelSpeedMMM;
-            RapidTravelSpeed = Machine.MaxZTravelSpeedMMM;
+            RapidTravelSpeed = Machine.MaxTravelSpeedMMM;
             CarefulExtrudeSpeed = 20 * 60;
             RapidExtrudeSpeed = Machine.MaxExtrudeSpeedMMM;
             OuterPerimeterSpeedX = 0.5;

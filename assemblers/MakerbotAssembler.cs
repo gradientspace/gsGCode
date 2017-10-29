@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using g3;
-using gs;
+using gs.info;
 
 namespace gs
 {
@@ -71,7 +71,7 @@ namespace gs
 		void AppendHeader_Replicator2() {
 
 			Builder.AddCommentLine("; Print Settings");
-			Builder.AddCommentLine("; Model: Makerbot " + Settings.Model.ToString());
+			Builder.AddCommentLine("; Model: Makerbot " + Settings.ModelEnum.ToString());
 			Builder.AddCommentLine("; Layer Height: " + Settings.LayerHeightMM);
 			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
 			Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC);

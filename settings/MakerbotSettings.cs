@@ -3,28 +3,32 @@ using System.Linq;
 using System.Text;
 using g3;
 
-namespace gs
+namespace gs.info
 {
 	public static class Makerbot
 	{
-		public enum Models {
+        public const string UUID = "77b7ed08-dcc8-4c2e-a189-18aa549bf94b";
+
+        public enum Models {
             Unknown,
 			Replicator2
 		};
 
-	}
+        public const string UUID_Unknown = "625aa5dc-8e9d-4240-86ff-8bc369cd5124";
+        public const string UUID_Replicator2 = "a1c13f61-1ae6-4b1a-9c8c-18b2170e82b1";
+    }
 
 
 	public class MakerbotSettings : SingleMaterialFFFSettings
 	{
-        public Makerbot.Models Model;
+        public Makerbot.Models ModelEnum;
 
         public override AssemblerFactoryF AssemblerType() {
             return MakerbotAssembler.Factory;
         }
 
         public MakerbotSettings(Makerbot.Models model = Makerbot.Models.Replicator2) {
-			Model = model;
+			ModelEnum = model;
 
             if (model == Makerbot.Models.Replicator2)
                 configure_Replicator_2();
@@ -38,9 +42,12 @@ namespace gs
         void configure_Replicator_2()
         {
             Machine.ManufacturerName = "Makerbot";
+            Machine.ManufacturerUUID = Makerbot.UUID;
             Machine.ModelIdentifier = "Replicator 2";
+            Machine.ModelUUID = Makerbot.UUID_Replicator2;
             Machine.Class = MachineClass.PlasticFFFPrinter;
-            Machine.BedSizeMM = new Vector2d(285, 153);
+            Machine.BedSizeXMM = 285;
+            Machine.BedSizeYMM = 153;
             Machine.MaxHeightMM = 155;
             Machine.NozzleDiamMM = 0.4;
             Machine.FilamentDiamMM = 1.75;
@@ -67,7 +74,7 @@ namespace gs
 
             RetractSpeed = Machine.MaxRetractSpeedMMM;
             ZTravelSpeed = Machine.MaxZTravelSpeedMMM;
-            RapidTravelSpeed = Machine.MaxZTravelSpeedMMM;
+            RapidTravelSpeed = Machine.MaxTravelSpeedMMM;
             CarefulExtrudeSpeed = 30 * 60;
             RapidExtrudeSpeed = Machine.MaxExtrudeSpeedMMM;
             OuterPerimeterSpeedX = 0.5;
@@ -77,10 +84,13 @@ namespace gs
         void configure_unknown()
         {
             Machine.ManufacturerName = "Makerbot";
+            Machine.ManufacturerUUID = Makerbot.UUID;
             Machine.ModelIdentifier = "(Unknown)";
+            Machine.ModelUUID = Makerbot.UUID_Unknown;
             Machine.Class = MachineClass.PlasticFFFPrinter;
 
-            Machine.BedSizeMM = new Vector2d(100,100);
+            Machine.BedSizeXMM = 100;
+            Machine.BedSizeYMM = 100;
             Machine.MaxHeightMM = 130;
             Machine.NozzleDiamMM = 0.4;
             Machine.FilamentDiamMM = 1.75;
@@ -106,7 +116,7 @@ namespace gs
 
             RetractSpeed = Machine.MaxRetractSpeedMMM;
             ZTravelSpeed = Machine.MaxZTravelSpeedMMM;
-            RapidTravelSpeed = Machine.MaxZTravelSpeedMMM;
+            RapidTravelSpeed = Machine.MaxTravelSpeedMMM;
             CarefulExtrudeSpeed = 30 * 60;
             RapidExtrudeSpeed = Machine.MaxExtrudeSpeedMMM;
             OuterPerimeterSpeedX = 0.5;
