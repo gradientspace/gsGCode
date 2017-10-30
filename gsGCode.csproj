@@ -60,6 +60,9 @@
     <Compile Include="settings\AdditiveSettings.cs" />
     <Compile Include="settings\MakerbotSettings.cs" />
     <Compile Include="interpreters\GCodeToPlanarComplex.cs" />
+    <Compile Include="settings\RepRapSettings.cs" />
+    <Compile Include="settings\PrintrbotSettings.cs" />
+    <Compile Include="assemblers\AssemblerUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\geometry3Sharp\geometry3Sharp.csproj">

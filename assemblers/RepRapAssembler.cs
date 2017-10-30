@@ -21,6 +21,10 @@ namespace gs
 		public RepRapAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder)
         {
 			Settings = settings;
+
+			OmitDuplicateZ = true;
+			OmitDuplicateF = true;
+			OmitDuplicateE = true;
 		}
 
 
@@ -53,6 +57,15 @@ namespace gs
 
 
 
+		public enum HeaderState
+		{
+			AfterComments,
+			AfterTemperature,
+			BeforeHome,
+			BeforePrime
+		};
+		public Action<HeaderState, GCodeBuilder> HeaderCustomizerF = (state, builder) => { };
+
 
 
 
@@ -67,6 +80,8 @@ namespace gs
 			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
 			Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC + " Bed Temp: " + Settings.HeatedBedTempC);
 
+			HeaderCustomizerF(HeaderState.AfterComments, Builder);
+
 			// M109
 			SetExtruderTargetTempAndWait(Settings.ExtruderTempC);
 
@@ -74,11 +89,15 @@ namespace gs
 			if (Settings.Machine.HasHeatedBed && Settings.HeatedBedTempC > 0)
 				SetBedTargetTempAndWait(Settings.HeatedBedTempC);
 
+			HeaderCustomizerF(HeaderState.AfterTemperature, Builder);
+
 			Builder.BeginGLine(21, "units=mm");
 			Builder.BeginGLine(90, "absolute positions");
 			Builder.BeginMLine(82, "absolute extruder position");
 
 			DisableFan();
+
+			HeaderCustomizerF(HeaderState.BeforeHome, Builder);
 
 			Builder.BeginGLine(28, "home x/y").AppendI("X", 0).AppendI("Y", 0);
 			currentPos.x = currentPos.y = 0;
@@ -88,17 +107,24 @@ namespace gs
 			currentPos.z = 0;
 
 
-            double PrimeHeight = 0.27;
-            double PrimeExtrudePerMM_1p75 = 0.1;
+			HeaderCustomizerF(HeaderState.BeforePrime, Builder);
+
+			// extruder prime by drawing line across front of bed
+			double PrimeHeight = Settings.LayerHeightMM * 1.35;
+			double PrimeWidth = 2 * Settings.Machine.NozzleDiamMM;
+			Vector3d frontRight = new Vector3d(Settings.Machine.BedSizeXMM / 2, -Settings.Machine.BedSizeYMM / 2, PrimeHeight);
+			frontRight.x -= 10;
+			frontRight.y += 5;
+			Vector3d frontLeft = frontRight; frontLeft.x = -frontRight.x;
+			double primeLen = frontRight.Distance(frontLeft);
+
             double PrimeFeedRate = 1800;
-            Vector3d frontRight = new Vector3d(Settings.Machine.BedSizeXMM / 2, -Settings.Machine.BedSizeYMM / 2, PrimeHeight);
-            frontRight.x -= 10;
-            frontRight.y += 5;
-            Vector3d frontLeft = frontRight; frontLeft.x = -frontRight.x;
+			double prime_feed_len = AssemblerUtil.CalculateExtrudedFilament(
+				PrimeWidth, PrimeHeight, primeLen, Settings.Machine.FilamentDiamMM);
+
             Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
             AppendMoveTo(frontRight, 9000, "start prime");
-            double feed_amount = PrimeExtrudePerMM_1p75 * frontRight.Distance(frontLeft);
-            AppendExtrudeTo(frontLeft, PrimeFeedRate, feed_amount, "prime");
+			AppendExtrudeTo(frontLeft, PrimeFeedRate, prime_feed_len, "prime");
 
 
             // [RMS] this does not extrude very much and does not seem to work?
@@ -122,7 +148,6 @@ namespace gs
 
 			UpdateProgress(0);
 		}
-
 
 
 

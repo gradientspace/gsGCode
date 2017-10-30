@@ -37,12 +37,20 @@ namespace gs
 		public Vector2d PositionShift = Vector2d.Zero;
 
 
+		public int TravelGCode = 0;
+
+		public bool OmitDuplicateZ = false;
+		public bool OmitDuplicateF = false;
+		public bool OmitDuplicateE = false;
+
+
 
         public BaseDepositionAssembler(GCodeBuilder useBuilder) 
 		{
 			Builder = useBuilder;
 			currentPos = Vector3d.Zero;
 			extruderA = 0;
+			currentFeed = 0;
 		}
 
 
@@ -91,6 +99,12 @@ namespace gs
 			get { return currentPos; }
 		}
 
+		protected double currentFeed;
+		public double FeedRate 
+		{
+			get { return currentFeed; }
+		}
+
         protected double extruderA;
 		public double ExtruderA 
 		{
@@ -116,9 +130,18 @@ namespace gs
 		{
 			double write_x = x + PositionShift.x;
 			double write_y = y + PositionShift.y;
-			Builder.BeginGLine(1, comment).
-			       AppendF("X",write_x).AppendF("Y",write_y).AppendF("Z",z).AppendF("F",f);
+			Builder.BeginGLine(TravelGCode, comment).
+				   AppendF("X", write_x).AppendF("Y", write_y);
+			
+			if (OmitDuplicateZ == false || MathUtil.PrecisionEqual(z, currentPos.z, 5) == false) {
+				Builder.AppendF("Z", z);
+			}
+			if (OmitDuplicateF == false || MathUtil.PrecisionEqual(f, currentFeed, 5) == false) {
+				Builder.AppendF("F", f);
+			}
+
 			currentPos = new Vector3d(x, y, z);
+			currentFeed = f;
 		}
         public virtual void AppendMoveTo(Vector3d pos, double f, string comment = null)
         {
@@ -139,10 +162,22 @@ namespace gs
         protected virtual void AppendMoveToE(double x, double y, double z, double f, double e, string comment = null) 
 		{
 			double write_x = x + PositionShift.x;
-			double write_y = y + PositionShift.y;	
+			double write_y = y + PositionShift.y;
 			Builder.BeginGLine(1, comment).
-			       AppendF("X",write_x).AppendF("Y",write_y).AppendF("Z",z).AppendF("F",f).AppendF("E",e);
+				   AppendF("X", write_x).AppendF("Y", write_y);
+			
+			if (OmitDuplicateZ == false || MathUtil.PrecisionEqual(z,currentPos.z,5) == false ) {
+				Builder.AppendF("Z", z);
+			}
+			if (OmitDuplicateF == false || MathUtil.PrecisionEqual(f, currentFeed, 5) == false) {
+				Builder.AppendF("F", f);				
+			}
+			if (OmitDuplicateE == false || MathUtil.PrecisionEqual(e, extruderA, 5) == false) {
+				Builder.AppendF("E", e);
+			}
+
 			currentPos = new Vector3d(x, y, z);
+			currentFeed = f;
 			extruderA = e;
 		}
         protected virtual void AppendMoveToE(Vector3d pos, double f, double e, string comment = null)
@@ -158,6 +193,7 @@ namespace gs
 			Builder.BeginGLine(1, comment).
 			       AppendF("X",write_x).AppendF("Y",write_y).AppendF("Z",z).AppendF("F",f).AppendF("A",a);
 			currentPos = new Vector3d(x, y, z);
+			currentFeed = f;
 			extruderA = a;
 		}
         protected virtual void AppendMoveToA(Vector3d pos, double f, double a, string comment = null)

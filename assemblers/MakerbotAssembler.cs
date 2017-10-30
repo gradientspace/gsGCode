@@ -24,6 +24,8 @@ namespace gs
                 throw new Exception("MakerbotAssembler: incorrect settings type!");
 
             Settings = settings as MakerbotSettings;
+
+			TravelGCode = 1;
 		}
 
 
