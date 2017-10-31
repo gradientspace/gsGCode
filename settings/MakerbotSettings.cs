@@ -75,7 +75,7 @@ namespace gs.info
             ExtruderTempC = 230;
             HeatedBedTempC = 0;
 
-            FillPathSpacingMM = 0.4;
+            SolidFillNozzleDiamStepX = 1.0;
             RetractDistanceMM = 1.3;
 
             RetractSpeed = Machine.MaxRetractSpeedMMM;
@@ -117,7 +117,7 @@ namespace gs.info
             ExtruderTempC = 230;
             HeatedBedTempC = 0;
 
-            FillPathSpacingMM = 0.4;
+            SolidFillNozzleDiamStepX = 1.0;
             RetractDistanceMM = 1.3;
 
             RetractSpeed = Machine.MaxRetractSpeedMMM;

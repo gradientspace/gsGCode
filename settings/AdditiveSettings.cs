@@ -174,7 +174,7 @@ namespace gs
 		 * All units are mm
 		 */
 
-		public double FillPathSpacingMM = 0.4;
+		public double SolidFillNozzleDiamStepX = 1.0;
 
 		public double RetractDistanceMM = 1.3;
 
@@ -232,6 +232,16 @@ namespace gs
 
 
 
+        /*
+         * functions that calculate derived values
+         * NOTE: these cannot be properties because then they will be json-serialized!
+         */
+        public double SolidFillPathSpacingMM() {
+            return Machine.NozzleDiamMM * SolidFillNozzleDiamStepX;
+        }
+
+
+
         public override T CloneAs<T>()
         {
             SingleMaterialFFFSettings copy = new SingleMaterialFFFSettings();
@@ -245,7 +255,7 @@ namespace gs
 
             to.ExtruderTempC = this.ExtruderTempC;
             to.HeatedBedTempC = this.HeatedBedTempC;
-            to.FillPathSpacingMM = this.FillPathSpacingMM;
+            to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
             to.RetractDistanceMM = this.RetractDistanceMM;
 
             to.RetractSpeed = this.RetractSpeed;
