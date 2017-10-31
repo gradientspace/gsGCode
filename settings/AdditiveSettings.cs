@@ -201,7 +201,7 @@ namespace gs
          * Shells
          */
         public int Shells = 2;
-        public int InteriorSolidRegionShells = 1;       // how many shells to add around interior solid regions (eg roof/floor)
+        public int InteriorSolidRegionShells = 0;       // how many shells to add around interior solid regions (eg roof/floor)
 
 		/*
 		 * Roof/Floors
