@@ -85,11 +85,15 @@ namespace gs
 			// M109
 			SetExtruderTargetTempAndWait(Settings.ExtruderTempC);
 
-			// M190
-			if (Settings.Machine.HasHeatedBed && Settings.HeatedBedTempC > 0)
-				SetBedTargetTempAndWait(Settings.HeatedBedTempC);
+            // M190
+            if (Settings.Machine.HasHeatedBed) {
+                if (Settings.HeatedBedTempC > 0)
+                    SetBedTargetTempAndWait(Settings.HeatedBedTempC);
+                else
+                    SetBedTargetTemp(0, "disable heated bed");
+            }
 
-			HeaderCustomizerF(HeaderState.AfterTemperature, Builder);
+            HeaderCustomizerF(HeaderState.AfterTemperature, Builder);
 
 			Builder.BeginGLine(21, "units=mm");
 			Builder.BeginGLine(90, "absolute positions");
