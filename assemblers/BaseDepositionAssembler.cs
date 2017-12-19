@@ -43,6 +43,7 @@ namespace gs
 		public bool OmitDuplicateF = false;
 		public bool OmitDuplicateE = false;
 
+        public double MoveEpsilon = 0.00001;
 
 
         public BaseDepositionAssembler(GCodeBuilder useBuilder) 
@@ -133,10 +134,10 @@ namespace gs
 			Builder.BeginGLine(TravelGCode, comment).
 				   AppendF("X", write_x).AppendF("Y", write_y);
 			
-			if (OmitDuplicateZ == false || MathUtil.PrecisionEqual(z, currentPos.z, 5) == false) {
+			if (OmitDuplicateZ == false || MathUtil.EpsilonEqual(z, currentPos.z, MoveEpsilon) == false) {
 				Builder.AppendF("Z", z);
 			}
-			if (OmitDuplicateF == false || MathUtil.PrecisionEqual(f, currentFeed, 5) == false) {
+			if (OmitDuplicateF == false || MathUtil.EpsilonEqual(f, currentFeed, MoveEpsilon) == false) {
 				Builder.AppendF("F", f);
 			}
 
@@ -166,13 +167,13 @@ namespace gs
 			Builder.BeginGLine(1, comment).
 				   AppendF("X", write_x).AppendF("Y", write_y);
 			
-			if (OmitDuplicateZ == false || MathUtil.PrecisionEqual(z,currentPos.z,5) == false ) {
+			if (OmitDuplicateZ == false || MathUtil.EpsilonEqual(z,currentPos.z, MoveEpsilon) == false ) {
 				Builder.AppendF("Z", z);
 			}
-			if (OmitDuplicateF == false || MathUtil.PrecisionEqual(f, currentFeed, 5) == false) {
+			if (OmitDuplicateF == false || MathUtil.EpsilonEqual(f, currentFeed, MoveEpsilon) == false) {
 				Builder.AppendF("F", f);				
 			}
-			if (OmitDuplicateE == false || MathUtil.PrecisionEqual(e, extruderA, 5) == false) {
+			if (OmitDuplicateE == false || MathUtil.EpsilonEqual(e, extruderA, MoveEpsilon) == false) {
 				Builder.AppendF("E", e);
 			}
 
