@@ -215,6 +215,12 @@ namespace gs
 		 */
 		public double SparseLinearInfillStepX = 3.0;      // this is a multiplier on FillPathSpacingMM
 
+        /*
+         * Support settings
+         */
+        public bool EnableSupport = false;
+        public double SupportSpacingStepX = 3.0;         // usage depends on support technique?           
+
 
         /*
          * Toolpath filtering options
@@ -270,6 +276,8 @@ namespace gs
             to.RoofLayers = this.RoofLayers;
             to.FloorLayers = this.FloorLayers;
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
+            to.EnableSupport = this.EnableSupport;
+            to.SupportSpacingStepX = this.SupportSpacingStepX;
             to.ClipSelfOverlaps = this.ClipSelfOverlaps;
             to.SelfOverlapToleranceX = this.SelfOverlapToleranceX;
             to.LayerRangeFilter = this.LayerRangeFilter;
