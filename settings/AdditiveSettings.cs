@@ -220,6 +220,7 @@ namespace gs
          */
         public bool EnableSupport = false;
         public double SupportSpacingStepX = 3.0;         // usage depends on support technique?           
+        public double SupportVolumeScale = 0.9;          // multiplier on extrusion volume
 
 
         /*
@@ -278,6 +279,7 @@ namespace gs
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
             to.EnableSupport = this.EnableSupport;
             to.SupportSpacingStepX = this.SupportSpacingStepX;
+            to.SupportVolumeScale = this.SupportVolumeScale;
             to.ClipSelfOverlaps = this.ClipSelfOverlaps;
             to.SelfOverlapToleranceX = this.SelfOverlapToleranceX;
             to.LayerRangeFilter = this.LayerRangeFilter;

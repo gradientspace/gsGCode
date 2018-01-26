@@ -37,6 +37,12 @@ namespace gs
 		public Vector2d PositionShift = Vector2d.Zero;
 
 
+        /// <summary>
+        /// will assert if we try to move outside these bounds
+        /// </summary>
+        public AxisAlignedBox2d PositionBounds = AxisAlignedBox2d.Infinite;
+
+
 		public int TravelGCode = 0;
 
 		public bool OmitDuplicateZ = false;
@@ -49,7 +55,7 @@ namespace gs
         public BaseDepositionAssembler(GCodeBuilder useBuilder) 
 		{
 			Builder = useBuilder;
-			currentPos = Vector3d.Zero;
+            update_currentPos(Vector3d.Zero);
 			extruderA = 0;
 			currentFeed = 0;
 		}
@@ -95,6 +101,14 @@ namespace gs
 
 
         protected Vector3d currentPos;
+        protected void update_currentPos(Vector3d v)
+        {
+            if (PositionBounds.Contains(v.xy) == false)
+                throw new Exception("BaseDepositionAssembler: tried to move outside of bounds!");
+            currentPos = v;
+        }
+
+
 		public Vector3d NozzlePosition
 		{
 			get { return currentPos; }
@@ -141,7 +155,7 @@ namespace gs
 				Builder.AppendF("F", f);
 			}
 
-			currentPos = new Vector3d(x, y, z);
+            update_currentPos(new Vector3d(x, y, z));
 			currentFeed = f;
 		}
         public virtual void AppendMoveTo(Vector3d pos, double f, string comment = null)
@@ -177,7 +191,7 @@ namespace gs
 				Builder.AppendF("E", e);
 			}
 
-			currentPos = new Vector3d(x, y, z);
+            update_currentPos(new Vector3d(x, y, z));
 			currentFeed = f;
 			extruderA = e;
 		}
@@ -193,7 +207,7 @@ namespace gs
 			double write_y = y + PositionShift.y;				
 			Builder.BeginGLine(1, comment).
 			       AppendF("X",write_x).AppendF("Y",write_y).AppendF("Z",z).AppendF("F",f).AppendF("A",a);
-			currentPos = new Vector3d(x, y, z);
+            update_currentPos(new Vector3d(x, y, z));
 			currentFeed = f;
 			extruderA = a;
 		}
