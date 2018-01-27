@@ -177,6 +177,7 @@ namespace gs
 		public double SolidFillNozzleDiamStepX = 1.0;
 
 		public double RetractDistanceMM = 1.3;
+        public double MinRetractTravelLength = 2.5;     // don't retract if we are travelling less than this distance
 
 
 		/*
@@ -264,6 +265,7 @@ namespace gs
             to.HeatedBedTempC = this.HeatedBedTempC;
             to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
             to.RetractDistanceMM = this.RetractDistanceMM;
+            to.MinRetractTravelLength = this.MinRetractTravelLength;
 
             to.RetractSpeed = this.RetractSpeed;
             to.ZTravelSpeed = this.ZTravelSpeed;
