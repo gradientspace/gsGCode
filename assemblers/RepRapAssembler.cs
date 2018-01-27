@@ -82,9 +82,6 @@ namespace gs
 
 			HeaderCustomizerF(HeaderState.AfterComments, Builder);
 
-			// M109
-			SetExtruderTargetTempAndWait(Settings.ExtruderTempC);
-
             // M190
             if (Settings.Machine.HasHeatedBed) {
                 if (Settings.HeatedBedTempC > 0)
@@ -92,6 +89,9 @@ namespace gs
                 else
                     SetBedTargetTemp(0, "disable heated bed");
             }
+
+            // M109
+            SetExtruderTargetTempAndWait(Settings.ExtruderTempC);
 
             HeaderCustomizerF(HeaderState.AfterTemperature, Builder);
 
