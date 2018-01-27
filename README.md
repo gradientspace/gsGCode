@@ -2,7 +2,9 @@
 
 GCode parsing / manipulation / generation library. 
 
-C#, MIT License, No dependencies. Copyright 2017 ryan schmidt / gradientspace
+C#, MIT License. Copyright 2017 ryan schmidt / gradientspace
+
+Dependencies: [geometry3Sharp](https://github.com/gradientspace/geometry3Sharp) (Boost license)
 
 questions? get in touch on twitter: [@rms80](http://www.twitter.com/rms80) or [@gradientspace](http://www.twitter.com/gradientspace), 
 or email [rms@gradientspace.com](mailto:rms@gradientspace.com?subject=gsGCode).
