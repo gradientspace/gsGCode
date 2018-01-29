@@ -43,6 +43,15 @@ namespace gs
         public AxisAlignedBox2d PositionBounds = AxisAlignedBox2d.Infinite;
 
 
+        /// <summary>
+        /// Generally, deposition-style 3D printers cannot handle large numbers of very small GCode steps.
+        /// The result will be very chunky.
+        /// So, we will cluster sequences of tiny steps into something that can actually be output.
+        /// </summary>
+        public double MinExtrudeStepDistance = 0.1f;
+
+
+
 		public int TravelGCode = 0;
 
 		public bool OmitDuplicateZ = false;
@@ -55,7 +64,7 @@ namespace gs
         public BaseDepositionAssembler(GCodeBuilder useBuilder) 
 		{
 			Builder = useBuilder;
-            update_currentPos(Vector3d.Zero);
+            currentPos = Vector3d.Zero;
 			extruderA = 0;
 			currentFeed = 0;
 		}
@@ -99,17 +108,8 @@ namespace gs
          * Position commands
          */
 
-
         protected Vector3d currentPos;
-        protected void update_currentPos(Vector3d v)
-        {
-            if (PositionBounds.Contains(v.xy) == false)
-                throw new Exception("BaseDepositionAssembler: tried to move outside of bounds!");
-            currentPos = v;
-        }
-
-
-		public Vector3d NozzlePosition
+        public Vector3d NozzlePosition
 		{
 			get { return currentPos; }
 		}
@@ -139,29 +139,120 @@ namespace gs
 			get { return in_travel; }
 		}
 
+        public bool InExtrude {
+            get { return InTravel == false; }
+        }
+
+
+
+
+
+        int short_count = 0;
+
+        protected struct QueuedExtrude
+        {
+            public Vector3d toPos;
+            public double feedRate;
+            public double extruderA;
+            public char extrudeChar;
+            public string comment;
+        }
+
+
+        protected QueuedExtrude[] point_queue = new QueuedExtrude[1024];
+        int queue_index = 0;
+
+
+        protected virtual void queue_move(Vector3d toPos, double feedRate, string comment)
+        {
+            Util.gDevAssert(InExtrude == false);
+            if (PositionBounds.Contains(toPos.xy) == false)
+                throw new Exception("BaseDepositionAssembler.queue_move: tried to move outside of bounds!");
+
+            emit_move(toPos, feedRate, comment);
+
+            currentPos = toPos;
+            currentFeed = feedRate;
+            queue_index = 0;
+        }
+        protected virtual void emit_move(Vector3d toPos, double feedRate, string comment)
+        {
+            double write_x = toPos.x + PositionShift.x;
+            double write_y = toPos.y + PositionShift.y;
+
+            Builder.BeginGLine(TravelGCode, comment).
+                   AppendF("X", write_x).AppendF("Y", write_y);
+
+            if (OmitDuplicateZ == false || MathUtil.EpsilonEqual(currentPos.z, toPos.z, MoveEpsilon) == false) {
+                Builder.AppendF("Z", toPos.z);
+            }
+            if (OmitDuplicateF == false || MathUtil.EpsilonEqual(currentFeed, feedRate, MoveEpsilon) == false) {
+                Builder.AppendF("F", feedRate);
+            }
+        }
+
+
+
+        protected virtual void queue_extrude(Vector3d toPos, double feedRate, double e, char extrudeChar, string comment, bool bIsRetract)
+        {
+            Util.gDevAssert(InExtrude);
+            if (PositionBounds.Contains(toPos.xy) == false)
+                throw new Exception("BaseDepositionAssembler.queue_extrude: tried to move outside of bounds!");
+
+            QueuedExtrude p = new QueuedExtrude() {
+                toPos = toPos, feedRate = feedRate, extruderA = e, extrudeChar = extrudeChar, comment = comment
+            };
+
+            emit_extrude(p);
+
+            currentPos = toPos;
+            currentFeed = feedRate;
+            queue_index = 0;
+        }
+        protected virtual void queue_extrude_to(Vector3d toPos, double feedRate, double extrudeDist, string comment, bool bIsRetract)
+        {
+            if (ExtrudeParam == ExtrudeParamType.ExtrudeParamA)
+                queue_extrude(toPos, feedRate, extrudeDist, 'A', comment, bIsRetract);
+            else
+                queue_extrude(toPos, feedRate, extrudeDist, 'E', comment, bIsRetract);
+        }
+
+
+        protected virtual void emit_extrude(QueuedExtrude p)
+        {
+            double write_x = p.toPos.x + PositionShift.x;
+            double write_y = p.toPos.y + PositionShift.y;
+            Builder.BeginGLine(1, p.comment).
+                   AppendF("X", write_x).AppendF("Y", write_y);
+
+            if (OmitDuplicateZ == false || MathUtil.EpsilonEqual(p.toPos.z, currentPos.z, MoveEpsilon) == false) {
+                Builder.AppendF("Z", p.toPos.z);
+            }
+            if (OmitDuplicateF == false || MathUtil.EpsilonEqual(p.feedRate, currentFeed, MoveEpsilon) == false) {
+                Builder.AppendF("F", p.feedRate);
+            }
+            if (OmitDuplicateE == false || MathUtil.EpsilonEqual(p.extruderA, extruderA, MoveEpsilon) == false) {
+                Builder.AppendF(p.extrudeChar.ToString(), p.extruderA);
+            }
+
+            currentPos = p.toPos;
+            currentFeed = p.feedRate;
+            extruderA = p.extruderA;
+        }
+
+
+
 
 
 		public virtual void AppendMoveTo(double x, double y, double z, double f, string comment = null) 
 		{
-			double write_x = x + PositionShift.x;
-			double write_y = y + PositionShift.y;
-			Builder.BeginGLine(TravelGCode, comment).
-				   AppendF("X", write_x).AppendF("Y", write_y);
-			
-			if (OmitDuplicateZ == false || MathUtil.EpsilonEqual(z, currentPos.z, MoveEpsilon) == false) {
-				Builder.AppendF("Z", z);
-			}
-			if (OmitDuplicateF == false || MathUtil.EpsilonEqual(f, currentFeed, MoveEpsilon) == false) {
-				Builder.AppendF("F", f);
-			}
-
-            update_currentPos(new Vector3d(x, y, z));
-			currentFeed = f;
+            queue_move(new Vector3d(x, y, z), f, comment);
 		}
         public virtual void AppendMoveTo(Vector3d pos, double f, string comment = null)
         {
             AppendMoveTo(pos.x, pos.y, pos.z, f, comment);
         }
+
 
 
         public virtual void AppendExtrudeTo(Vector3d pos, double feedRate, double extrudeDist, string comment = null)
@@ -173,27 +264,9 @@ namespace gs
         }
 
 
-
         protected virtual void AppendMoveToE(double x, double y, double z, double f, double e, string comment = null) 
 		{
-			double write_x = x + PositionShift.x;
-			double write_y = y + PositionShift.y;
-			Builder.BeginGLine(1, comment).
-				   AppendF("X", write_x).AppendF("Y", write_y);
-			
-			if (OmitDuplicateZ == false || MathUtil.EpsilonEqual(z,currentPos.z, MoveEpsilon) == false ) {
-				Builder.AppendF("Z", z);
-			}
-			if (OmitDuplicateF == false || MathUtil.EpsilonEqual(f, currentFeed, MoveEpsilon) == false) {
-				Builder.AppendF("F", f);				
-			}
-			if (OmitDuplicateE == false || MathUtil.EpsilonEqual(e, extruderA, MoveEpsilon) == false) {
-				Builder.AppendF("E", e);
-			}
-
-            update_currentPos(new Vector3d(x, y, z));
-			currentFeed = f;
-			extruderA = e;
+            queue_extrude(new Vector3d(x, y, z), f, e, 'E', comment, false);
 		}
         protected virtual void AppendMoveToE(Vector3d pos, double f, double e, string comment = null)
         {
@@ -203,13 +276,7 @@ namespace gs
 
         protected virtual void AppendMoveToA(double x, double y, double z, double f, double a, string comment = null) 
 		{
-			double write_x = x + PositionShift.x;
-			double write_y = y + PositionShift.y;				
-			Builder.BeginGLine(1, comment).
-			       AppendF("X",write_x).AppendF("Y",write_y).AppendF("Z",z).AppendF("F",f).AppendF("A",a);
-            update_currentPos(new Vector3d(x, y, z));
-			currentFeed = f;
-			extruderA = a;
+            queue_extrude(new Vector3d(x, y, z), f, a, 'A', comment, false);
 		}
         protected virtual void AppendMoveToA(Vector3d pos, double f, double a, string comment = null)
         {
@@ -229,7 +296,7 @@ namespace gs
 				throw new Exception("BaseDepositionAssembler.BeginRetract: retract extrudeA is forward motion!");
 
 			retractA = extruderA;
-            AppendExtrudeTo(pos, feedRate, extrudeDist, (comment == null) ? "Retract" : comment);
+            queue_extrude_to(pos, feedRate, extrudeDist, (comment == null) ? "Retract" : comment, true);
             in_retract = true;
 		}
 
@@ -241,7 +308,7 @@ namespace gs
 				throw new Exception("BaseDepositionAssembler.EndRetract: restart position is not same as start of retract!");
 			if (extrudeDist == -9999)
 				extrudeDist = retractA;
-            AppendExtrudeTo(pos, feedRate, extrudeDist, (comment == null) ? "End Retract" : comment);
+            queue_extrude_to(pos, feedRate, extrudeDist, (comment == null) ? "Retract" : comment, true);
 			in_retract = false;
 		}
 
