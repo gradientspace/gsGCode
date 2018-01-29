@@ -15,6 +15,20 @@ namespace gs
     public delegate BaseDepositionAssembler AssemblerFactoryF(GCodeBuilder builder, SingleMaterialFFFSettings settings);
 
 
+    /// <summary>
+    /// Assembler translates high-level commands from Compiler (eg MoveTo, ExtrudeTo, BeginRetract, etc)
+    /// into GCode instructions, which it passes to GCodeBuilder instance.
+    /// 
+    /// To do this, Assembler maintains state machine for things like current nozzle position,
+    /// extruder position, etc. 
+    /// 
+    /// TODO:
+    ///   - need to reset accumulated extrusion distance to 0 once in a while, 
+    ///     to avoid precision issues.
+    ///   - support relative mode for position and extruder
+    /// 
+    /// 
+    /// </summary>
 	public abstract class BaseDepositionAssembler : IDepositionAssembler
 	{
 		public GCodeBuilder Builder;
@@ -46,28 +60,32 @@ namespace gs
         /// <summary>
         /// Generally, deposition-style 3D printers cannot handle large numbers of very small GCode steps.
         /// The result will be very chunky.
-        /// So, we will cluster sequences of tiny steps into something that can actually be output.
+        /// So, we will cluster sequences of tiny steps into something that can actually be printed.
         /// </summary>
-        public double MinExtrudeStepDistance = 0.1f;
+        public double MinExtrudeStepDistance = 0.0f;        // is set to FFFMachineInfo.MinPointSpacingMM in constructor below!!
 
 
-
-		public int TravelGCode = 0;
+        // Makerbot uses G1 for travel as well as extrude, so need to be able to override this
+        public int TravelGCode = 0;
 
 		public bool OmitDuplicateZ = false;
 		public bool OmitDuplicateF = false;
 		public bool OmitDuplicateE = false;
 
+        // threshold for omitting "duplicate" Z/F/E parameters
         public double MoveEpsilon = 0.00001;
 
 
-        public BaseDepositionAssembler(GCodeBuilder useBuilder) 
+        public BaseDepositionAssembler(GCodeBuilder useBuilder, FFFMachineInfo machineInfo) 
 		{
 			Builder = useBuilder;
             currentPos = Vector3d.Zero;
+            lastPos = Vector3d.Zero;
 			extruderA = 0;
 			currentFeed = 0;
-		}
+
+            MinExtrudeStepDistance = machineInfo.MinPointSpacingMM;
+        }
 
 
         /*
@@ -109,9 +127,12 @@ namespace gs
          */
 
         protected Vector3d currentPos;
+        protected Vector3d lastPos;
         public Vector3d NozzlePosition
 		{
-			get { return currentPos; }
+			get {
+                return lastPos;
+            }
 		}
 
 		protected double currentFeed;
@@ -146,9 +167,30 @@ namespace gs
 
 
 
+        /*
+         * Code below is all to support MinExtrudeStepDistance > 0
+         * In that case, we want to only emit the next gcode extrusion point once we have travelled
+         * at least MinExtrudeStepDistance distance. To do that, we will skip points
+         * until we have moved far enough, then emit one.
+         * 
+         * Currently we are saving all the skipped points in a queue, although we only use
+         * the last two to emit. Current strategy is to lerp along the last line segment,
+         * so that the emitted point is exactly at linear-arc-length MinExtrudeStepDistance.
+         * The remainder of the last line goes back on the queue.
+         * 
+         * This does end up clipping sharp corners if they are made of multiple closely-spaced
+         * points. However the scale of the clipping should be on the order of the filament
+         * width, so it probably doesn't make a visual difference. And (anecdotally) it may
+         * actually produce cleaner results in the corners...
+         * 
+         * [TODO] This is actually speed-dependent. We could modulate the clipping step size
+         * by the movement speed. Or, we could slow down to hit the higher precision?
+         * Might be preferable to just be consistent per layer, though...
+         */
 
-        int short_count = 0;
 
+
+        // stores info we need to emit an extrude gcode point
         protected struct QueuedExtrude
         {
             public Vector3d toPos;
@@ -156,26 +198,42 @@ namespace gs
             public double extruderA;
             public char extrudeChar;
             public string comment;
+
+            static public QueuedExtrude lerp(ref QueuedExtrude a, ref QueuedExtrude b, double t)
+            {
+                QueuedExtrude newp = new QueuedExtrude();
+                newp.toPos = Vector3d.Lerp(a.toPos, b.toPos, t);
+                newp.feedRate = Math.Max(a.feedRate, b.feedRate);
+                newp.extruderA = MathUtil.Lerp(a.extruderA, b.extruderA, t);
+                newp.extrudeChar = a.extrudeChar;
+                newp.comment = (a.comment == null) ? a.comment : b.comment;
+                return newp;
+            }
         }
 
 
-        protected QueuedExtrude[] point_queue = new QueuedExtrude[1024];
-        int queue_index = 0;
+        protected QueuedExtrude[] extrude_queue = new QueuedExtrude[1024];
+        protected double extrude_queue_len = 0;
+        int next_queue_index = 0;
+        
 
-
-        protected virtual void queue_move(Vector3d toPos, double feedRate, string comment)
+        // we do not actually queue travel moves, but we might need to flush extrude queue
+        protected virtual void queue_travel(Vector3d toPos, double feedRate, string comment)
         {
             Util.gDevAssert(InExtrude == false);
             if (PositionBounds.Contains(toPos.xy) == false)
                 throw new Exception("BaseDepositionAssembler.queue_move: tried to move outside of bounds!");
 
-            emit_move(toPos, feedRate, comment);
+            lastPos = toPos;
 
-            currentPos = toPos;
-            currentFeed = feedRate;
-            queue_index = 0;
+            // flush any pending extrude
+            flush_extrude_queue();
+
+            emit_travel(toPos, feedRate, comment);
         }
-        protected virtual void emit_move(Vector3d toPos, double feedRate, string comment)
+
+        // actually emit travel move gcode
+        protected virtual void emit_travel(Vector3d toPos, double feedRate, string comment)
         {
             double write_x = toPos.x + PositionShift.x;
             double write_y = toPos.y + PositionShift.y;
@@ -189,25 +247,66 @@ namespace gs
             if (OmitDuplicateF == false || MathUtil.EpsilonEqual(currentFeed, feedRate, MoveEpsilon) == false) {
                 Builder.AppendF("F", feedRate);
             }
+
+            currentPos = toPos;
+            currentFeed = feedRate;
         }
 
 
-
+        // push an extrude move onto queue
         protected virtual void queue_extrude(Vector3d toPos, double feedRate, double e, char extrudeChar, string comment, bool bIsRetract)
         {
-            Util.gDevAssert(InExtrude);
+            Util.gDevAssert(InExtrude || bIsRetract);
             if (PositionBounds.Contains(toPos.xy) == false)
                 throw new Exception("BaseDepositionAssembler.queue_extrude: tried to move outside of bounds!");
+
+            lastPos = toPos;
 
             QueuedExtrude p = new QueuedExtrude() {
                 toPos = toPos, feedRate = feedRate, extruderA = e, extrudeChar = extrudeChar, comment = comment
             };
 
-            emit_extrude(p);
+            // we cannot queue a retract, so flush queue and emit the retract/unretract
+            if ( bIsRetract ) {
+                flush_extrude_queue();
+                emit_extrude(p);
+                return;
+            }
 
-            currentPos = toPos;
-            currentFeed = feedRate;
-            queue_index = 0;
+            // push this point onto queue. this will also update the extrude_queue_len
+            double prev_len = extrude_queue_len;
+            append_to_queue(p);
+
+            // if we haven't moved far enough to emit a point, we wait
+            if (extrude_queue_len < MinExtrudeStepDistance) {
+                return;
+            }
+            // ok we moved far enough from last point to emit
+
+            // if queue has one point, just emit it
+            int last_i = next_queue_index-1;
+            if (last_i == 0) {
+                flush_extrude_queue();
+                return;
+            }
+
+            // otherwise we lerp between last two points so that we emit at
+            // point where accumulated linear arclength is exactly MinExtrudeStepDistance.
+            double a = prev_len, b = extrude_queue_len;
+            double t = (MinExtrudeStepDistance-a) / (b-a);
+            Util.gDevAssert(t > -0.0001 && t < 1.0001);
+            t = MathUtil.Clamp(t, 0, 1);
+            QueuedExtrude last_p = extrude_queue[next_queue_index - 1];
+            QueuedExtrude emit_p = QueuedExtrude.lerp(ref extrude_queue[next_queue_index-2], ref last_p, t);
+
+            // emit and clear queue
+            emit_extrude(emit_p);
+            next_queue_index = 0;
+            extrude_queue_len = 0;
+
+            // now we re-submit last point. This pushes the remaining bit of the last segment
+            // back onto the queue. (should we skip this if t > nearly-one?)
+            queue_extrude(last_p.toPos, last_p.feedRate, last_p.extruderA, last_p.extrudeChar, last_p.comment, false);
         }
         protected virtual void queue_extrude_to(Vector3d toPos, double feedRate, double extrudeDist, string comment, bool bIsRetract)
         {
@@ -217,7 +316,7 @@ namespace gs
                 queue_extrude(toPos, feedRate, extrudeDist, 'E', comment, bIsRetract);
         }
 
-
+        // emit gcode for an extrude move
         protected virtual void emit_extrude(QueuedExtrude p)
         {
             double write_x = p.toPos.x + PositionShift.x;
@@ -240,13 +339,37 @@ namespace gs
             extruderA = p.extruderA;
         }
 
+        // push point onto queue and update accumulated length
+        protected virtual void append_to_queue(QueuedExtrude p)
+        {
+            double dt = (next_queue_index == 0) ?
+                currentPos.xy.Distance(p.toPos.xy) : extrude_queue[next_queue_index-1].toPos.xy.Distance(p.toPos.xy);
+            extrude_queue_len += dt;
+
+            extrude_queue[next_queue_index] = p;
+            next_queue_index = Math.Min(next_queue_index + 1, extrude_queue.Length - 1); ;
+        }
+
+        // emit point at end of queue and clear it
+        protected virtual void flush_extrude_queue()
+        {
+            if (next_queue_index > 0) {
+                emit_extrude(extrude_queue[next_queue_index - 1]);
+                next_queue_index = 0;
+            }
+            extrude_queue_len = 0;
+        }
 
 
+
+        /*
+         * Assembler API that Compiler uses
+         */
 
 
 		public virtual void AppendMoveTo(double x, double y, double z, double f, string comment = null) 
 		{
-            queue_move(new Vector3d(x, y, z), f, comment);
+            queue_travel(new Vector3d(x, y, z), f, comment);
 		}
         public virtual void AppendMoveTo(Vector3d pos, double f, string comment = null)
         {
@@ -335,6 +458,14 @@ namespace gs
 
 
 
+        /// <summary>
+        /// Assembler may internally queue up a series of points, to optimize gcode emission.
+        /// Call this to ensure that everything is written out to GCodeBuilder
+        /// </summary>
+        public virtual void FlushQueues()
+        {
+            flush_extrude_queue();
+        }
 
 
 	}

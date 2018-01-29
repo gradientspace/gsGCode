@@ -72,7 +72,16 @@ namespace gs
         public int MaxZTravelSpeedMMM = 20 * 60;
         public int MaxRetractSpeedMMM = 20 * 60;
 
+        /*
+         * Hacks?
+         */
 
+        public double MinPointSpacingMM = 0.3;          // Avoid emitting gcode extrusion points closer than this spacing.
+                                                        // This is a workaround for the fact that many printers do not gracefully
+                                                        // handle very tiny sequential extrusion steps. This setting could be
+                                                        // configured using CalibrationModelGenerator.MakePrintStepSizeTest() with
+                                                        // all other cleanup steps disabled.
+                                                        // [TODO] this is actually speed-dependent...
 
         public override T CloneAs<T>()
         {
@@ -96,6 +105,7 @@ namespace gs
             to.MaxTravelSpeedMMM = this.MaxTravelSpeedMMM;
             to.MaxZTravelSpeedMMM = this.MaxZTravelSpeedMMM;
             to.MaxRetractSpeedMMM = this.MaxRetractSpeedMMM;
+            to.MinPointSpacingMM = this.MinPointSpacingMM;
 
             to.ManufacturerName = this.ManufacturerName;
             to.ManufacturerUUID = this.ManufacturerUUID;

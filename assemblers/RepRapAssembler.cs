@@ -18,7 +18,7 @@ namespace gs
 		public SingleMaterialFFFSettings Settings;
 
 
-		public RepRapAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder)
+		public RepRapAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder, settings.Machine)
         {
 			Settings = settings;
 

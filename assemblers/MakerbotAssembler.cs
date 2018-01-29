@@ -18,7 +18,7 @@ namespace gs
 		public MakerbotSettings Settings;
 
 
-		public MakerbotAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder)
+		public MakerbotAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder, settings.Machine)
         {
             if (settings is MakerbotSettings == false)
                 throw new Exception("MakerbotAssembler: incorrect settings type!");
@@ -39,7 +39,9 @@ namespace gs
             base.BeginRetract(pos, feedRate, extrudeDist, comment);
 
             // [RMS] makerbot does this...but does it do anything??
+            base.BeginTravel();
             AppendMoveTo(pos, 3000, "Retract 2?");
+            base.EndTravel();
 		}
 
 		public override void EndRetract(Vector3d pos, double feedRate, double extrudeDist = -9999, string comment = null) {
@@ -149,8 +151,10 @@ namespace gs
 			       AppendI("X",127).AppendI("Y",127).AppendI("A",127).AppendI("B",127);
 
 
-			// thick line along front of bed, at start of print
+            // thick line along front of bed, at start of print
+            BeginTravel();
 			AppendMoveTo(PrimeFrontRight.x, PrimeFrontRight.y, PrimeHeight, 9000, "(Extruder Prime Dry Move)");
+            EndTravel();
 			AppendMoveToE(FrontLeft.x, FrontLeft.y, PrimeHeight, 1800, 25, "(Extruder Prime Start)");
 
 			Builder.BeginGLine(92,"(Reset after prime)").AppendI("A",0).AppendI("B",0);
