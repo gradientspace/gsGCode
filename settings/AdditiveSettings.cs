@@ -184,8 +184,6 @@ namespace gs
 		 * All units are mm
 		 */
 
-		public double SolidFillNozzleDiamStepX = 1.0;
-
 		public double RetractDistanceMM = 1.3;
         public double MinRetractTravelLength = 2.5;     // don't retract if we are travelling less than this distance
 
@@ -220,11 +218,21 @@ namespace gs
 		public int RoofLayers = 2;
 		public int FloorLayers = 2;
 
+        /*
+         *  Solid fill settings
+         */
+        public double SolidFillNozzleDiamStepX = 1.0;       // multipler on Machine.NozzleDiamMM, defines spacing between adjacent
+                                                            // solid fill parallel lines
+        public double SolidFillBorderOverlapX = 0.25f;      // this is a multiplier on Machine.NozzleDiamMM, defines how far we
+                                                            // overlap solid fill onto border shells (if 0, no overlap)
 
-		/*
+        /*
 		 * Sparse infill settings
 		 */
-		public double SparseLinearInfillStepX = 3.0;      // this is a multiplier on FillPathSpacingMM
+        public double SparseLinearInfillStepX = 3.0;      // this is a multiplier on FillPathSpacingMM
+
+        public double SparseFillBorderOverlapX = 0.25f;     // this is a multiplier on Machine.NozzleDiamMM, defines how far we
+                                                            // overlap solid fill onto border shells (if 0, no overlap)
 
         /*
          * Support settings
@@ -274,6 +282,7 @@ namespace gs
             to.ExtruderTempC = this.ExtruderTempC;
             to.HeatedBedTempC = this.HeatedBedTempC;
             to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
+            to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
             to.RetractDistanceMM = this.RetractDistanceMM;
             to.MinRetractTravelLength = this.MinRetractTravelLength;
 
@@ -289,6 +298,7 @@ namespace gs
             to.RoofLayers = this.RoofLayers;
             to.FloorLayers = this.FloorLayers;
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
+            to.SparseFillBorderOverlapX = this.SparseFillBorderOverlapX;
             to.EnableSupport = this.EnableSupport;
             to.SupportSpacingStepX = this.SupportSpacingStepX;
             to.SupportVolumeScale = this.SupportVolumeScale;
