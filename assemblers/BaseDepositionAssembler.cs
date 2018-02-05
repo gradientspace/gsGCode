@@ -99,7 +99,6 @@ namespace gs
 		public abstract void UpdateProgress(int i);
 		public abstract void ShowMessage(string s);
 
-
         /*
 		 * These seem standard enough that we will provide a default implementation
 		 */
@@ -456,6 +455,11 @@ namespace gs
             throw new NotImplementedException("BaseDepositionAssembler.AppendTravelTo");
 		}
 
+
+        public virtual void AppendComment(string comment)
+        {
+            Builder.AddCommentLine(comment);
+        }
 
 
         /// <summary>
