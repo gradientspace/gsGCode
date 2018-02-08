@@ -74,11 +74,8 @@ namespace gs
 		}
 		void AppendHeader_StandardRepRap() {
 
-			Builder.AddCommentLine("; Print Settings");
+            base.AddStandardHeader(Settings);
 			Builder.AddCommentLine("; Model: " + Settings.Machine.ManufacturerName + " " + Settings.Machine.ModelIdentifier);
-			Builder.AddCommentLine("; Layer Height: " + Settings.LayerHeightMM);
-			Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
-			Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC + " Bed Temp: " + Settings.HeatedBedTempC);
 
 			HeaderCustomizerF(HeaderState.AfterComments, Builder);
 
@@ -127,8 +124,10 @@ namespace gs
 				PrimeWidth, PrimeHeight, primeLen, Settings.Machine.FilamentDiamMM);
 
             Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
+            BeginTravel();
             AppendMoveTo(frontRight, 9000, "start prime");
-			AppendExtrudeTo(frontLeft, PrimeFeedRate, prime_feed_len, "prime");
+            EndTravel();
+            AppendExtrudeTo(frontLeft, PrimeFeedRate, prime_feed_len, "prime");
 
 
             // [RMS] this does not extrude very much and does not seem to work?

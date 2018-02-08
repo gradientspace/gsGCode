@@ -472,6 +472,27 @@ namespace gs
         }
 
 
+
+
+
+        protected virtual void AddStandardHeader(SingleMaterialFFFSettings Settings)
+        {
+            Builder.AddCommentLine("; Generated on " + DateTime.Now.ToLongDateString());
+            Builder.AddCommentLine("; Print Settings");
+            Builder.AddCommentLine("; Layer Height: " + Settings.LayerHeightMM);
+            Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
+            Builder.AddCommentLine("; Extruder Temp: " + Settings.ExtruderTempC);
+            Builder.AddCommentLine(string.Format("; Speeds Extrude: {0}  Travel: {1} Z: {2}", Settings.RapidExtrudeSpeed, Settings.RapidTravelSpeed, Settings.ZTravelSpeed));
+            Builder.AddCommentLine(string.Format("; Retract Distance: {0}  Speed: {1}", Settings.RetractDistanceMM, Settings.RetractSpeed));
+            Builder.AddCommentLine(string.Format("; Shells: {0}  InteriorShells: {1}", Settings.Shells, Settings.InteriorSolidRegionShells));
+            Builder.AddCommentLine(string.Format("; RoofLayers: {0}  FloorLayers: {1}", Settings.RoofLayers, Settings.FloorLayers));
+            Builder.AddCommentLine(string.Format("; InfillX: {0}", Settings.SparseLinearInfillStepX));
+            Builder.AddCommentLine(string.Format("; Support: {0}  SpacingX: {1}", Settings.EnableSupport, Settings.SupportSpacingStepX));
+            Builder.AddCommentLine(string.Format("; ClipOverlaps: {0}  Tolerance: {1}", Settings.ClipSelfOverlaps, Settings.SelfOverlapToleranceX));
+            Builder.AddCommentLine(string.Format("; LayerRange: {0}-{1}", Settings.LayerRangeFilter.a, Settings.LayerRangeFilter.b));
+        }
+
+
 	}
 
 
