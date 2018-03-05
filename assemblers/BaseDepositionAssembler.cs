@@ -417,7 +417,9 @@ namespace gs
 			if (extrudeDist > extruderA)
 				throw new Exception("BaseDepositionAssembler.BeginRetract: retract extrudeA is forward motion!");
 
-			retractA = extruderA;
+            // need to flush any pending extrudes here, so that extruderA is at actual last extrude value
+            flush_extrude_queue();
+            retractA = extruderA;
             queue_extrude_to(pos, feedRate, extrudeDist, (comment == null) ? "Retract" : comment, true);
             in_retract = true;
 		}

@@ -179,11 +179,12 @@ namespace gs
         public int ExtruderTempC = 210;
         public int HeatedBedTempC = 0;
 
-		/*
+        /*
 		 * Distances.
 		 * All units are mm
 		 */
 
+        public bool EnableRetraction = true;
 		public double RetractDistanceMM = 1.3;
         public double MinRetractTravelLength = 2.5;     // don't retract if we are travelling less than this distance
 
@@ -286,6 +287,7 @@ namespace gs
             to.HeatedBedTempC = this.HeatedBedTempC;
             to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
             to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
+            to.EnableRetraction = this.EnableRetraction;
             to.RetractDistanceMM = this.RetractDistanceMM;
             to.MinRetractTravelLength = this.MinRetractTravelLength;
 
