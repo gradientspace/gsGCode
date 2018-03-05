@@ -238,10 +238,12 @@ namespace gs
          * Support settings
          */
         public bool EnableSupport = true;
+        public double SupportOverhangAngleDeg = 35;      // standard "support angle"
         public double SupportSpacingStepX = 5.0;         // usage depends on support technique?           
         public double SupportVolumeScale = 0.9;          // multiplier on extrusion volume
         public bool EnableSupportShell = true;           // should we print a shell around support areas
-        public double SupportGapInLayerX = 1.25f;        // multiple of Machine.NozzleDiam that we leave between support and print
+        public double SupportAreaOffsetX = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
+        public double SupportSolidSpace = 0.25f;         // how much space to leave between model and support
 
         /*
          * Toolpath filtering options
