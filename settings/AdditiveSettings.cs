@@ -237,8 +237,8 @@ namespace gs
         /*
          * Support settings
          */
-        public bool EnableSupport = false;
-        public double SupportSpacingStepX = 3.0;         // usage depends on support technique?           
+        public bool EnableSupport = true;
+        public double SupportSpacingStepX = 5.0;         // usage depends on support technique?           
         public double SupportVolumeScale = 0.9;          // multiplier on extrusion volume
         public bool EnableSupportShell = true;           // should we print a shell around support areas
         public double SupportGapInLayerX = 1.25f;        // multiple of Machine.NozzleDiam that we leave between support and print
