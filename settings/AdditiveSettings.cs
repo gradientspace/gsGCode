@@ -230,7 +230,7 @@ namespace gs
         /*
 		 * Sparse infill settings
 		 */
-        public double SparseLinearInfillStepX = 3.0;      // this is a multiplier on FillPathSpacingMM
+        public double SparseLinearInfillStepX = 5.0;      // this is a multiplier on FillPathSpacingMM
 
         public double SparseFillBorderOverlapX = 0.25f;     // this is a multiplier on Machine.NozzleDiamMM, defines how far we
                                                             // overlap solid fill onto border shells (if 0, no overlap)
