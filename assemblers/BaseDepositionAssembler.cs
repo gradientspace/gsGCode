@@ -266,7 +266,8 @@ namespace gs
             };
 
             // we cannot queue a retract, so flush queue and emit the retract/unretract
-            if ( bIsRetract ) {
+            bool bForceEmit = (bIsRetract) || (toPos.z != NozzlePosition.z);
+            if (bForceEmit) {
                 flush_extrude_queue();
                 emit_extrude(p);
                 return;
@@ -432,7 +433,7 @@ namespace gs
 				throw new Exception("BaseDepositionAssembler.EndRetract: restart position is not same as start of retract!");
 			if (extrudeDist == -9999)
 				extrudeDist = retractA;
-            queue_extrude_to(pos, feedRate, extrudeDist, (comment == null) ? "Retract" : comment, true);
+            queue_extrude_to(pos, feedRate, extrudeDist, (comment == null) ? "End Retract" : comment, true);
 			in_retract = false;
 		}
 
@@ -461,6 +462,15 @@ namespace gs
         public virtual void AppendComment(string comment)
         {
             Builder.AddCommentLine(comment);
+        }
+
+
+        public virtual void AppendDwell(int milliseconds, string comment = null)
+        {
+            flush_extrude_queue();
+
+            Builder.BeginGLine(4, (comment != null) ? comment : "dwell" )
+                .AppendI("P", milliseconds);
         }
 
 
