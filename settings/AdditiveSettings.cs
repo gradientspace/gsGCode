@@ -245,6 +245,8 @@ namespace gs
         public bool EnableSupportShell = true;           // should we print a shell around support areas
         public double SupportAreaOffsetX = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
         public double SupportSolidSpace = 0.25f;         // how much space to leave between model and support
+		public double SupportPointDiam = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
+		public int SupportPointSides = 4;           	 // number of vertices for support-point polygons (circles)
 
         /*
          * Toolpath filtering options
@@ -285,8 +287,6 @@ namespace gs
 
             to.ExtruderTempC = this.ExtruderTempC;
             to.HeatedBedTempC = this.HeatedBedTempC;
-            to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
-            to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
             to.EnableRetraction = this.EnableRetraction;
             to.RetractDistanceMM = this.RetractDistanceMM;
             to.MinRetractTravelLength = this.MinRetractTravelLength;
@@ -302,13 +302,26 @@ namespace gs
             to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;
             to.RoofLayers = this.RoofLayers;
             to.FloorLayers = this.FloorLayers;
+
+			to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
+			to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
+
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
             to.SparseFillBorderOverlapX = this.SparseFillBorderOverlapX;
+
             to.EnableSupport = this.EnableSupport;
+			to.SupportOverhangAngleDeg = this.SupportOverhangAngleDeg;
             to.SupportSpacingStepX = this.SupportSpacingStepX;
             to.SupportVolumeScale = this.SupportVolumeScale;
+			to.EnableSupportShell = this.EnableSupportShell;
+			to.SupportAreaOffsetX = this.SupportAreaOffsetX;
+			to.SupportSolidSpace = this.SupportSolidSpace;
+			to.SupportPointDiam = this.SupportPointDiam;
+			to.SupportPointSides = this.SupportPointSides;
+
             to.ClipSelfOverlaps = this.ClipSelfOverlaps;
             to.SelfOverlapToleranceX = this.SelfOverlapToleranceX;
+
             to.LayerRangeFilter = this.LayerRangeFilter;
         }
 
