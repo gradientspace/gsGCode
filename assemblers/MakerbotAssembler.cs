@@ -28,6 +28,10 @@ namespace gs
             PositionBounds = new AxisAlignedBox2d(settings.Machine.BedSizeXMM, settings.Machine.BedSizeYMM);
             PositionBounds.Translate(-PositionBounds.Center);
 
+            // [RMS] currently bed dimensions are hardcoded in header setup, and this trips bounds-checker.
+            // So, disable this checking for now.
+            EnableBoundsChecking = false;
+
             TravelGCode = 1;
 		}
 

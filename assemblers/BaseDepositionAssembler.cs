@@ -52,7 +52,12 @@ namespace gs
 
 
         /// <summary>
-        /// will assert if we try to move outside these bounds
+        /// check that all points lie within bounds
+        /// </summary>
+        public bool EnableBoundsChecking = true;
+
+        /// <summary>
+        /// if EnableBoundsChecking=true, will assert if we try to move outside these bounds
         /// </summary>
         public AxisAlignedBox2d PositionBounds = AxisAlignedBox2d.Infinite;
 
@@ -220,7 +225,7 @@ namespace gs
         protected virtual void queue_travel(Vector3d toPos, double feedRate, string comment)
         {
             Util.gDevAssert(InExtrude == false);
-            if (PositionBounds.Contains(toPos.xy) == false)
+            if (EnableBoundsChecking && PositionBounds.Contains(toPos.xy) == false)
                 throw new Exception("BaseDepositionAssembler.queue_move: tried to move outside of bounds!");
 
             lastPos = toPos;
@@ -256,7 +261,7 @@ namespace gs
         protected virtual void queue_extrude(Vector3d toPos, double feedRate, double e, char extrudeChar, string comment, bool bIsRetract)
         {
             Util.gDevAssert(InExtrude || bIsRetract);
-            if (PositionBounds.Contains(toPos.xy) == false)
+            if (EnableBoundsChecking && PositionBounds.Contains(toPos.xy) == false)
                 throw new Exception("BaseDepositionAssembler.queue_extrude: tried to move outside of bounds!");
 
             lastPos = toPos;
