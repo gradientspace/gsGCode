@@ -238,7 +238,7 @@ namespace gs
         /*
          * Support settings
          */
-        public bool EnableSupport = true;
+        public bool GenerateSupport = true;              // should we auto-generate support
         public double SupportOverhangAngleDeg = 35;      // standard "support angle"
         public double SupportSpacingStepX = 5.0;         // usage depends on support technique?           
         public double SupportVolumeScale = 0.9;          // multiplier on extrusion volume
@@ -310,7 +310,7 @@ namespace gs
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
             to.SparseFillBorderOverlapX = this.SparseFillBorderOverlapX;
 
-            to.EnableSupport = this.EnableSupport;
+            to.GenerateSupport = this.GenerateSupport;
 			to.SupportOverhangAngleDeg = this.SupportOverhangAngleDeg;
             to.SupportSpacingStepX = this.SupportSpacingStepX;
             to.SupportVolumeScale = this.SupportVolumeScale;

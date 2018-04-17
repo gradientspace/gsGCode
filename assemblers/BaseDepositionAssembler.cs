@@ -504,7 +504,8 @@ namespace gs
             Builder.AddCommentLine(string.Format("; Shells: {0}  InteriorShells: {1}", Settings.Shells, Settings.InteriorSolidRegionShells));
             Builder.AddCommentLine(string.Format("; RoofLayers: {0}  FloorLayers: {1}", Settings.RoofLayers, Settings.FloorLayers));
             Builder.AddCommentLine(string.Format("; InfillX: {0}", Settings.SparseLinearInfillStepX));
-            Builder.AddCommentLine(string.Format("; Support: {0}  SpacingX: {1}", Settings.EnableSupport, Settings.SupportSpacingStepX));
+            Builder.AddCommentLine(string.Format("; Support: {0}  Angle {1} SpacingX: {2}  Shell: {3}  Gap: {4}  VolScale: {5}", 
+                Settings.GenerateSupport, Settings.SupportOverhangAngleDeg, Settings.SupportSpacingStepX, Settings.EnableSupportShell, Settings.SupportSolidSpace, Settings.SupportVolumeScale));
             Builder.AddCommentLine(string.Format("; ClipOverlaps: {0}  Tolerance: {1}", Settings.ClipSelfOverlaps, Settings.SelfOverlapToleranceX));
             Builder.AddCommentLine(string.Format("; LayerRange: {0}-{1}", Settings.LayerRangeFilter.a, Settings.LayerRangeFilter.b));
         }
