@@ -203,6 +203,7 @@ namespace gs
 
 		public double CarefulExtrudeSpeed = 30 * 60;  	// 1800
 		public double RapidExtrudeSpeed = 90 * 60;      // 5400
+        public double MinExtrudeSpeed = 10 * 60;        // 600
 
 		public double OuterPerimeterSpeedX = 0.5;
 
