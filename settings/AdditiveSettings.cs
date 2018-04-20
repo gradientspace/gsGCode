@@ -125,7 +125,7 @@ namespace gs
         /// <summary>
         /// This is the "name" of this settings (eg user identifier)
         /// </summary>
-        public string Identifier = "Default";
+        public string Identifier = "Defaults";
 
 		public double LayerHeightMM = 0.2;
 
