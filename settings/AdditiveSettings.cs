@@ -76,7 +76,7 @@ namespace gs
          * Hacks?
          */
 
-        public double MinPointSpacingMM = 0.5;          // Avoid emitting gcode extrusion points closer than this spacing.
+        public double MinPointSpacingMM = 0.1;          // Avoid emitting gcode extrusion points closer than this spacing.
                                                         // This is a workaround for the fact that many printers do not gracefully
                                                         // handle very tiny sequential extrusion steps. This setting could be
                                                         // configured using CalibrationModelGenerator.MakePrintStepSizeTest() with
