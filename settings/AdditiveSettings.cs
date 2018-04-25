@@ -247,7 +247,18 @@ namespace gs
         public double SupportAreaOffsetX = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
         public double SupportSolidSpace = 0.25f;         // how much space to leave between model and support
 		public double SupportPointDiam = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
-		public int SupportPointSides = 4;           	 // number of vertices for support-point polygons (circles)
+		public int SupportPointSides = 4;                // number of vertices for support-point polygons (circles)
+
+
+		/*
+		 * Bridging settings
+		 */
+		public bool EnableBridging = true;
+		public double MaxBridgeWidthMM = 10.0;
+		public double BridgeFillNozzleDiamStepX = 0.85;  // multiplier on FillPathSpacingMM
+		public double BridgeVolumeScale = 1.0;           // multiplier on extrusion volume
+		public double BridgeExtrudeSpeedX = 0.5;		 // multiplier on CarefulExtrudeSpeed
+
 
         /*
          * Toolpath filtering options
@@ -273,7 +284,9 @@ namespace gs
         public double SolidFillPathSpacingMM() {
             return Machine.NozzleDiamMM * SolidFillNozzleDiamStepX;
         }
-
+        public double BridgeFillPathSpacingMM() {
+			return Machine.NozzleDiamMM * BridgeFillNozzleDiamStepX;
+        }
 
 
         public override T CloneAs<T>()
@@ -321,6 +334,13 @@ namespace gs
 			to.SupportSolidSpace = this.SupportSolidSpace;
 			to.SupportPointDiam = this.SupportPointDiam;
 			to.SupportPointSides = this.SupportPointSides;
+
+			to.EnableBridging = this.EnableBridging;
+			to.MaxBridgeWidthMM = this.MaxBridgeWidthMM;
+			to.BridgeFillNozzleDiamStepX = this.BridgeFillNozzleDiamStepX;
+			to.BridgeVolumeScale = this.BridgeVolumeScale;
+			to.BridgeExtrudeSpeedX = this.BridgeExtrudeSpeedX;
+
 
             to.MinLayerTime = this.MinLayerTime;
             to.ClipSelfOverlaps = this.ClipSelfOverlaps;
