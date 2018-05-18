@@ -13,7 +13,8 @@ namespace gs.info
             Plus = 0
         };
 
-		public const string UUID_Plus = "1c868178-5aa2-47c3-9a8c-6f86ef1d1ff6";
+        public const string UUID_Unknown = "9a4cc498-376a-4780-956c-d0e145751868";
+        public const string UUID_Plus = "1c868178-5aa2-47c3-9a8c-6f86ef1d1ff6";
     }
 
 
