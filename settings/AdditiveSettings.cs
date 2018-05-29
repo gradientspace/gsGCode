@@ -213,6 +213,7 @@ namespace gs
          */
         public int Shells = 2;
         public int InteriorSolidRegionShells = 0;       // how many shells to add around interior solid regions (eg roof/floor)
+		public bool OuterShellLast = false;				// do outer shell last (better quality but worse precision)
 
 		/*
 		 * Roof/Floors
@@ -246,6 +247,7 @@ namespace gs
         public bool EnableSupportShell = true;           // should we print a shell around support areas
         public double SupportAreaOffsetX = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
         public double SupportSolidSpace = 0.25f;         // how much space to leave between model and support
+		public double SupportRegionJoinTolX = 2.0;		 // support regions within this distance will be merged via topological dilation. Multiplier on NozzleDiamMM.
 		public double SupportPointDiam = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
 		public int SupportPointSides = 4;                // number of vertices for support-point polygons (circles)
 
@@ -316,6 +318,7 @@ namespace gs
 
             to.Shells = this.Shells;
             to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;
+			to.OuterShellLast = this.OuterShellLast;
             to.RoofLayers = this.RoofLayers;
             to.FloorLayers = this.FloorLayers;
 
@@ -332,6 +335,7 @@ namespace gs
 			to.EnableSupportShell = this.EnableSupportShell;
 			to.SupportAreaOffsetX = this.SupportAreaOffsetX;
 			to.SupportSolidSpace = this.SupportSolidSpace;
+			to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
 			to.SupportPointDiam = this.SupportPointDiam;
 			to.SupportPointSides = this.SupportPointSides;
 

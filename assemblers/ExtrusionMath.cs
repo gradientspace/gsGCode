@@ -30,5 +30,24 @@ namespace gs
             return filament_len;
         }
 
+
+
+		public static double PathLengthToVolume(
+			double layerHeight, double nozzleDiam,
+			double pathLen)
+		{
+			double section_area = nozzleDiam * layerHeight;
+			double linear_volume = pathLen * section_area;
+			return linear_volume;			
+		}
+
+
+		public static double WidthFromTargetVolume(
+			double layerHeight, double pathLen, double targetVolume)
+		{
+			return targetVolume / (pathLen * layerHeight);
+		}
+
+
     }
 }
