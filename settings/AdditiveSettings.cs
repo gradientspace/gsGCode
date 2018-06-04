@@ -243,11 +243,12 @@ namespace gs
         public bool GenerateSupport = true;              // should we auto-generate support
         public double SupportOverhangAngleDeg = 35;      // standard "support angle"
         public double SupportSpacingStepX = 5.0;         // usage depends on support technique?           
-        public double SupportVolumeScale = 0.9;          // multiplier on extrusion volume
+        public double SupportVolumeScale = 1.0;          // multiplier on extrusion volume
         public bool EnableSupportShell = true;           // should we print a shell around support areas
         public double SupportAreaOffsetX = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
-        public double SupportSolidSpace = 0.25f;         // how much space to leave between model and support
+        public double SupportSolidSpace = 0.35f;         // how much space to leave between model and support
 		public double SupportRegionJoinTolX = 2.0;		 // support regions within this distance will be merged via topological dilation. Multiplier on NozzleDiamMM.
+        public bool SupportMinZTips = true;   // turn on/off detection of support 'tip' regions, ie tiny islands. Often spurious.
 		public double SupportPointDiam = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
 		public int SupportPointSides = 4;                // number of vertices for support-point polygons (circles)
 
@@ -336,7 +337,8 @@ namespace gs
 			to.SupportAreaOffsetX = this.SupportAreaOffsetX;
 			to.SupportSolidSpace = this.SupportSolidSpace;
 			to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
-			to.SupportPointDiam = this.SupportPointDiam;
+            to.SupportMinZTips = this.SupportMinZTips;
+            to.SupportPointDiam = this.SupportPointDiam;
 			to.SupportPointSides = this.SupportPointSides;
 
 			to.EnableBridging = this.EnableBridging;
