@@ -248,6 +248,8 @@ namespace gs
         public double SupportAreaOffsetX = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
         public double SupportSolidSpace = 0.35f;         // how much space to leave between model and support
 		public double SupportRegionJoinTolX = 2.0;		 // support regions within this distance will be merged via topological dilation. Multiplier on NozzleDiamMM.
+        public bool EnableSupportReleaseOpt = true;      // should we use support release optimization
+        public double SupportReleaseGap = 0.2f;          // how much space do we leave
         public bool SupportMinZTips = true;   // turn on/off detection of support 'tip' regions, ie tiny islands. Often spurious.
 		public double SupportPointDiam = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
 		public int SupportPointSides = 4;                // number of vertices for support-point polygons (circles)
@@ -337,6 +339,8 @@ namespace gs
 			to.SupportAreaOffsetX = this.SupportAreaOffsetX;
 			to.SupportSolidSpace = this.SupportSolidSpace;
 			to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
+            to.EnableSupportReleaseOpt = this.EnableSupportReleaseOpt;
+            to.SupportReleaseGap = this.SupportReleaseGap;
             to.SupportMinZTips = this.SupportMinZTips;
             to.SupportPointDiam = this.SupportPointDiam;
 			to.SupportPointSides = this.SupportPointSides;
