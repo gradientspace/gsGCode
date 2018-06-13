@@ -238,6 +238,13 @@ namespace gs
                                                             // overlap solid fill onto border shells (if 0, no overlap)
 
         /*
+         * Start layer controls
+         */
+        public int StartLayers = 0;                      // number of start layers, special handling
+        public double StartLayerHeightMM = 0;            // height of start layers. If 0, same as regular layers
+
+
+        /*
          * Support settings
          */
         public bool GenerateSupport = true;              // should we auto-generate support
@@ -271,7 +278,6 @@ namespace gs
         public double MinLayerTime = 5.0;                // minimum layer time in seconds
         public bool ClipSelfOverlaps = false;            // if true, try to remove portions of toolpaths that will self-overlap
         public double SelfOverlapToleranceX = 0.75;      // what counts as 'self-overlap'. this is a multiplier on NozzleDiamMM
-
 
         /*
          * Debug/Utility options
@@ -330,6 +336,9 @@ namespace gs
 
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
             to.SparseFillBorderOverlapX = this.SparseFillBorderOverlapX;
+
+            to.StartLayers = this.StartLayers;
+            to.StartLayerHeightMM = this.StartLayerHeightMM;
 
             to.GenerateSupport = this.GenerateSupport;
 			to.SupportOverhangAngleDeg = this.SupportOverhangAngleDeg;
