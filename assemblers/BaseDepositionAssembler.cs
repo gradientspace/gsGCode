@@ -479,6 +479,16 @@ namespace gs
         }
 
 
+        public virtual void AppendResetExtrudedLength()
+        {
+            if (in_retract)
+                throw new Exception("BaseDepositionAssembler.AppendResetExtrudedLength: cannot reset during retract!");
+            flush_extrude_queue();
+            Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
+            extruderA = 0;
+        }
+
+
         /// <summary>
         /// Assembler may internally queue up a series of points, to optimize gcode emission.
         /// Call this to ensure that everything is written out to GCodeBuilder
@@ -491,10 +501,10 @@ namespace gs
 
 
 
-
         protected virtual void AddStandardHeader(SingleMaterialFFFSettings Settings)
         {
             Builder.AddCommentLine("; Generated on " + DateTime.Now.ToLongDateString());
+            Builder.AddCommentLine(string.Format("; For {0} {1}", Settings.Machine.ManufacturerName, Settings.Machine.ModelIdentifier));
             Builder.AddCommentLine("; Print Settings");
             Builder.AddCommentLine("; Layer Height: " + Settings.LayerHeightMM);
             Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
@@ -511,7 +521,45 @@ namespace gs
         }
 
 
-	}
+
+
+
+
+        protected virtual void AddPrimeLine(SingleMaterialFFFSettings Settings)
+        {
+            Builder.AddCommentLine("---begin prime type=line");
+
+            // extruder prime by drawing line across front of bed
+            double PrimeHeight = Settings.Machine.MaxLayerHeightMM;
+            double PrimeWidth = 2 * Settings.Machine.NozzleDiamMM;
+
+            // assumes origin is at center of bed...
+            Vector3d frontRight = new Vector3d(Settings.Machine.BedSizeXMM / 2, -Settings.Machine.BedSizeYMM / 2, PrimeHeight);
+            frontRight.x -= 10;
+            frontRight.y += 5;
+            Vector3d frontLeft = frontRight; frontLeft.x = -frontRight.x;
+
+            double primeLen = frontRight.Distance(frontLeft);
+
+            double PrimeFeedRate = 1800;
+            double prime_feed_len = AssemblerUtil.CalculateExtrudedFilament(
+                PrimeWidth, PrimeHeight, primeLen, Settings.Machine.FilamentDiamMM);
+
+            Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
+            BeginTravel();
+            AppendMoveTo(frontRight, 9000, "start prime");
+            EndTravel();
+            AppendExtrudeTo(frontLeft, PrimeFeedRate, prime_feed_len, "extrude prime");
+
+            AppendResetExtrudedLength();
+
+            Builder.AddCommentLine("---end prime");
+        }
+
+
+
+
+    }
 
 
 }

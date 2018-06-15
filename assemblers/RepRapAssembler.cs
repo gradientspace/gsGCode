@@ -110,25 +110,7 @@ namespace gs
 
 			HeaderCustomizerF(HeaderState.BeforePrime, Builder);
 
-			// extruder prime by drawing line across front of bed
-			double PrimeHeight = Settings.LayerHeightMM * 1.35;
-			double PrimeWidth = 2 * Settings.Machine.NozzleDiamMM;
-			Vector3d frontRight = new Vector3d(Settings.Machine.BedSizeXMM / 2, -Settings.Machine.BedSizeYMM / 2, PrimeHeight);
-			frontRight.x -= 10;
-			frontRight.y += 5;
-			Vector3d frontLeft = frontRight; frontLeft.x = -frontRight.x;
-			double primeLen = frontRight.Distance(frontLeft);
-
-            double PrimeFeedRate = 1800;
-			double prime_feed_len = AssemblerUtil.CalculateExtrudedFilament(
-				PrimeWidth, PrimeHeight, primeLen, Settings.Machine.FilamentDiamMM);
-
-            Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
-            BeginTravel();
-            AppendMoveTo(frontRight, 9000, "start prime");
-            EndTravel();
-            AppendExtrudeTo(frontLeft, PrimeFeedRate, prime_feed_len, "prime");
-
+            base.AddPrimeLine(Settings);
 
             // [RMS] this does not extrude very much and does not seem to work?
             //Builder.BeginGLine(1, "move platform down").AppendF("Z", 15).AppendI("F", 9000);
