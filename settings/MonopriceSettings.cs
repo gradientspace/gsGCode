@@ -13,6 +13,7 @@ namespace gs.info
             MP_Select_Mini_V2 = 0
         };
 
+        public const string UUID_Unknown = "409e843b-c1d0-45fc-82d1-d7cc5635b8ee";
         public const string UUID_MP_Select_Mini_V2 = "4a498843-9080-4c97-aa82-b587f415ab1f";
     }
 

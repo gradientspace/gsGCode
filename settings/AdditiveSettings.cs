@@ -213,6 +213,7 @@ namespace gs
          */
         public int Shells = 2;
         public int InteriorSolidRegionShells = 0;       // how many shells to add around interior solid regions (eg roof/floor)
+		public bool OuterShellLast = false;				// do outer shell last (better quality but worse precision)
 
 		/*
 		 * Roof/Floors
@@ -239,15 +240,26 @@ namespace gs
                                                             // overlap solid fill onto border shells (if 0, no overlap)
 
         /*
+         * Start layer controls
+         */
+        public int StartLayers = 0;                      // number of start layers, special handling
+        public double StartLayerHeightMM = 0;            // height of start layers. If 0, same as regular layers
+
+
+        /*
          * Support settings
          */
         public bool GenerateSupport = true;              // should we auto-generate support
         public double SupportOverhangAngleDeg = 35;      // standard "support angle"
         public double SupportSpacingStepX = 5.0;         // usage depends on support technique?           
-        public double SupportVolumeScale = 0.9;          // multiplier on extrusion volume
+        public double SupportVolumeScale = 1.0;          // multiplier on extrusion volume
         public bool EnableSupportShell = true;           // should we print a shell around support areas
         public double SupportAreaOffsetX = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
-        public double SupportSolidSpace = 0.25f;         // how much space to leave between model and support
+        public double SupportSolidSpace = 0.35f;         // how much space to leave between model and support
+		public double SupportRegionJoinTolX = 2.0;		 // support regions within this distance will be merged via topological dilation. Multiplier on NozzleDiamMM.
+        public bool EnableSupportReleaseOpt = true;      // should we use support release optimization
+        public double SupportReleaseGap = 0.2f;          // how much space do we leave
+        public bool SupportMinZTips = true;   // turn on/off detection of support 'tip' regions, ie tiny islands. Often spurious.
 		public double SupportPointDiam = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
 		public int SupportPointSides = 4;                // number of vertices for support-point polygons (circles)
 
@@ -268,7 +280,6 @@ namespace gs
         public double MinLayerTime = 5.0;                // minimum layer time in seconds
         public bool ClipSelfOverlaps = false;            // if true, try to remove portions of toolpaths that will self-overlap
         public double SelfOverlapToleranceX = 0.75;      // what counts as 'self-overlap'. this is a multiplier on NozzleDiamMM
-
 
         /*
          * Debug/Utility options
@@ -321,6 +332,7 @@ namespace gs
 
             to.Shells = this.Shells;
             to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;
+			to.OuterShellLast = this.OuterShellLast;
             to.RoofLayers = this.RoofLayers;
             to.FloorLayers = this.FloorLayers;
 
@@ -331,6 +343,9 @@ namespace gs
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
             to.SparseFillBorderOverlapX = this.SparseFillBorderOverlapX;
 
+            to.StartLayers = this.StartLayers;
+            to.StartLayerHeightMM = this.StartLayerHeightMM;
+
             to.GenerateSupport = this.GenerateSupport;
 			to.SupportOverhangAngleDeg = this.SupportOverhangAngleDeg;
             to.SupportSpacingStepX = this.SupportSpacingStepX;
@@ -338,7 +353,11 @@ namespace gs
 			to.EnableSupportShell = this.EnableSupportShell;
 			to.SupportAreaOffsetX = this.SupportAreaOffsetX;
 			to.SupportSolidSpace = this.SupportSolidSpace;
-			to.SupportPointDiam = this.SupportPointDiam;
+			to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
+            to.EnableSupportReleaseOpt = this.EnableSupportReleaseOpt;
+            to.SupportReleaseGap = this.SupportReleaseGap;
+            to.SupportMinZTips = this.SupportMinZTips;
+            to.SupportPointDiam = this.SupportPointDiam;
 			to.SupportPointSides = this.SupportPointSides;
 
 			to.EnableBridging = this.EnableBridging;

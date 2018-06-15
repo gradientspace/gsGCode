@@ -141,8 +141,9 @@ namespace gs
             //Builder.BeginGLine(1, "reset speed").AppendI("F", 9000);
 
             // move to z=0
-            Builder.BeginGLine(1).AppendI("Z", 0).AppendI("F", 9000);
-			currentPos.z = 0;
+            BeginTravel();
+            AppendMoveTo(new Vector3d(NozzlePosition.x,NozzlePosition.y,0), Settings.ZTravelSpeed, "reset z");
+            EndTravel();
 
 			ShowMessage("Print Started");
 

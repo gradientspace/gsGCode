@@ -10,6 +10,7 @@ namespace gs
     {
 		public const double UnspecifiedValue = double.MaxValue;
 		public static readonly Vector3d UnspecifiedPosition = Vector3d.MaxValue;
+		public static readonly Vector2d UnspecifiedDimensions = Vector2d.MaxValue;
 
 		public static Vector3d Extrude(double a) {
 			return new Vector3d(a, UnspecifiedValue, UnspecifiedValue);
