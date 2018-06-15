@@ -223,8 +223,10 @@ namespace gs
         /*
          *  Solid fill settings
          */
+        public double ShellsFillNozzleDiamStepX = 1.0;      // multipler on Machine.NozzleDiamMM, defines spacing between adjacent
+                                                            // nested shells/perimeters. If < 1, they overlap.
         public double SolidFillNozzleDiamStepX = 1.0;       // multipler on Machine.NozzleDiamMM, defines spacing between adjacent
-                                                            // solid fill parallel lines
+                                                            // solid fill parallel lines. If < 1, they overlap.
         public double SolidFillBorderOverlapX = 0.25f;      // this is a multiplier on Machine.NozzleDiamMM, defines how far we
                                                             // overlap solid fill onto border shells (if 0, no overlap)
 
@@ -281,6 +283,9 @@ namespace gs
          * functions that calculate derived values
          * NOTE: these cannot be properties because then they will be json-serialized!
          */
+        public double ShellsFillPathSpacingMM() {
+            return Machine.NozzleDiamMM * ShellsFillNozzleDiamStepX;
+        }
         public double SolidFillPathSpacingMM() {
             return Machine.NozzleDiamMM * SolidFillNozzleDiamStepX;
         }
@@ -319,7 +324,8 @@ namespace gs
             to.RoofLayers = this.RoofLayers;
             to.FloorLayers = this.FloorLayers;
 
-			to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
+            to.ShellsFillNozzleDiamStepX = this.ShellsFillNozzleDiamStepX;
+            to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
 			to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
 
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
