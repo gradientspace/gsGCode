@@ -5,42 +5,33 @@ using g3;
 
 namespace gs.info
 {
-	public static class Makerbot
+	public static class Flashforge
 	{
-        public const string UUID = "77b7ed08-dcc8-4c2e-a189-18aa549bf94b";
+        public const string UUID = "5974064e-8751-4048-a700-73a023add74f";
 
         public enum Models {
             Unknown,
-			Replicator2
+			CreatorPro
 		};
 
-        public const string UUID_Unknown = "625aa5dc-8e9d-4240-86ff-8bc369cd5124";
-        public const string UUID_Replicator2 = "a1c13f61-1ae6-4b1a-9c8c-18b2170e82b1";
+        public const string UUID_Unknown = "f387a3d4-ba39-4a60-9e68-93ce7af4d92a";
+        public const string UUID_CreatorPro = "0dd884e1-9b19-436e-9558-e4cb5fb27f7d";
     }
 
 
-
-
-    public interface ISailfishSettings
+	public class FlashforgeSettings : SingleMaterialFFFSettings, ISailfishSettings
     {
-        string GPXModelFlag { get; }
-    }
-
-
-
-	public class MakerbotSettings : SingleMaterialFFFSettings, ISailfishSettings
-    {
-        public Makerbot.Models ModelEnum;
+        public Flashforge.Models ModelEnum;
 
         public override AssemblerFactoryF AssemblerType() {
             return MakerbotAssembler.Factory;
         }
 
-        public MakerbotSettings(Makerbot.Models model = Makerbot.Models.Replicator2) {
+        public FlashforgeSettings(Flashforge.Models model = Flashforge.Models.CreatorPro) {
 			ModelEnum = model;
 
-            if (model == Makerbot.Models.Replicator2)
-                configure_Replicator_2();
+            if (model == Flashforge.Models.CreatorPro)
+                configure_CreatorPro();
             else
                 configure_unknown();
 
@@ -48,7 +39,7 @@ namespace gs.info
 
 
         public override T CloneAs<T>() {
-            MakerbotSettings copy = new MakerbotSettings(this.ModelEnum);
+            FlashforgeSettings copy = new FlashforgeSettings(this.ModelEnum);
             this.CopyFieldsTo(copy);
             return copy as T;
         }
@@ -56,44 +47,42 @@ namespace gs.info
 
         public string GPXModelFlag {
             get {
-                if (ModelEnum == Makerbot.Models.Replicator2)
-                    return "-m r2";
+                if (ModelEnum == Flashforge.Models.CreatorPro)
+                    return "-m fcp";
                 else
                     return "";
             }
         }
 
 
-
-        void configure_Replicator_2()
+        void configure_CreatorPro()
         {
-            Machine.ManufacturerName = "Makerbot";
-            Machine.ManufacturerUUID = Makerbot.UUID;
-            Machine.ModelIdentifier = "Replicator 2";
-            Machine.ModelUUID = Makerbot.UUID_Replicator2;
+            Machine.ManufacturerName = "Flashforge";
+            Machine.ManufacturerUUID = Flashforge.UUID;
+            Machine.ModelIdentifier = "Creator Pro";
+            Machine.ModelUUID = Flashforge.UUID_CreatorPro;
             Machine.Class = MachineClass.PlasticFFFPrinter;
-            Machine.BedSizeXMM = 285;
-            Machine.BedSizeYMM = 153;
-            Machine.MaxHeightMM = 155;
+            Machine.BedSizeXMM = 227;
+            Machine.BedSizeYMM = 148;
+            Machine.MaxHeightMM = 150;
             Machine.NozzleDiamMM = 0.4;
             Machine.FilamentDiamMM = 1.75;
 
             Machine.MaxExtruderTempC = 230;
-            Machine.HasHeatedBed = false;
-            Machine.MaxBedTempC = 0;
+            Machine.HasHeatedBed = true;
+            Machine.MaxBedTempC = 105;
 
-            Machine.MaxExtrudeSpeedMMM = 90 * 60;
-            Machine.MaxTravelSpeedMMM = 150 * 60;
+            Machine.MaxExtrudeSpeedMMM = 60 * 60;
+            Machine.MaxTravelSpeedMMM = 80 * 60;
             Machine.MaxZTravelSpeedMMM = 23 * 60;
-            Machine.MaxRetractSpeedMMM = 25 * 60;
+            Machine.MaxRetractSpeedMMM = 20 * 60;
             Machine.MinLayerHeightMM = 0.1;
             Machine.MaxLayerHeightMM = 0.3;
-
 
             LayerHeightMM = 0.2;
 
             ExtruderTempC = 230;
-            HeatedBedTempC = 0;
+            HeatedBedTempC = 25;
 
             SolidFillNozzleDiamStepX = 1.0;
             RetractDistanceMM = 1.3;
@@ -109,10 +98,10 @@ namespace gs.info
 
         void configure_unknown()
         {
-            Machine.ManufacturerName = "Makerbot";
-            Machine.ManufacturerUUID = Makerbot.UUID;
+            Machine.ManufacturerName = "Flashforge";
+            Machine.ManufacturerUUID = Flashforge.UUID;
             Machine.ModelIdentifier = "(Unknown)";
-            Machine.ModelUUID = Makerbot.UUID_Unknown;
+            Machine.ModelUUID = Flashforge.UUID_Unknown;
             Machine.Class = MachineClass.PlasticFFFPrinter;
 
             Machine.BedSizeXMM = 100;
@@ -124,13 +113,13 @@ namespace gs.info
             Machine.MaxExtruderTempC = 230;
             Machine.HasHeatedBed = false;
             Machine.MaxBedTempC = 0;
-            Machine.MaxExtrudeSpeedMMM = 90 * 60;
-            Machine.MaxTravelSpeedMMM = 150 * 60;
+
+            Machine.MaxExtrudeSpeedMMM = 60 * 60;
+            Machine.MaxTravelSpeedMMM = 80 * 60;
             Machine.MaxZTravelSpeedMMM = 23 * 60;
-            Machine.MaxRetractSpeedMMM = 25 * 60;
+            Machine.MaxRetractSpeedMMM = 20 * 60;
             Machine.MinLayerHeightMM = 0.1;
             Machine.MaxLayerHeightMM = 0.3;
-
 
             LayerHeightMM = 0.2;
 
