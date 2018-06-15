@@ -72,6 +72,14 @@ namespace gs
         public int MaxZTravelSpeedMMM = 20 * 60;
         public int MaxRetractSpeedMMM = 20 * 60;
 
+
+        /*
+         *  bed levelling
+         */
+        public bool HasAutoBedLeveling = false;
+        public bool EnableAutoBedLeveling = false;
+
+
         /*
          * Hacks?
          */
@@ -106,6 +114,9 @@ namespace gs
             to.MaxZTravelSpeedMMM = this.MaxZTravelSpeedMMM;
             to.MaxRetractSpeedMMM = this.MaxRetractSpeedMMM;
             to.MinPointSpacingMM = this.MinPointSpacingMM;
+
+            to.EnableAutoBedLeveling = this.EnableAutoBedLeveling;
+            to.HasAutoBedLeveling = this.HasAutoBedLeveling;
 
             to.ManufacturerName = this.ManufacturerName;
             to.ManufacturerUUID = this.ManufacturerUUID;

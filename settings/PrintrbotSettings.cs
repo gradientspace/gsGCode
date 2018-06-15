@@ -22,9 +22,6 @@ namespace gs.info
     {
 		public Printrbot.Models ModelEnum;
 
-        public bool EnableAutoBedLevel;     // should we auto-bed-level?
-
-
         public override AssemblerFactoryF AssemblerType() {
 			return MakePrintrbotAssembler;
         }
@@ -46,8 +43,6 @@ namespace gs.info
         protected override void CopyFieldsTo(SingleMaterialFFFSettings to)
         {
             base.CopyFieldsTo(to);
-            if (to is PrintrbotSettings)
-                (to as PrintrbotSettings).EnableAutoBedLevel = this.EnableAutoBedLevel;
         }
 
 
@@ -91,9 +86,9 @@ namespace gs.info
             RapidExtrudeSpeed = Machine.MaxExtrudeSpeedMMM;
             OuterPerimeterSpeedX = 0.5;
 
-
             // specific to printrbot
-            EnableAutoBedLevel = true;
+            Machine.HasAutoBedLeveling = true;
+            Machine.EnableAutoBedLeveling = true;
         }
 
 
@@ -110,7 +105,7 @@ namespace gs.info
 		protected void HeaderCustomF(RepRapAssembler.HeaderState state, GCodeBuilder Builder)
 		{
 			if (state == RepRapAssembler.HeaderState.BeforePrime) {
-                if ( EnableAutoBedLevel )
+                if ( Machine.HasAutoBedLeveling && Machine.EnableAutoBedLeveling )
 				    Builder.BeginGLine(29, "auto-level bed");
 			}
 		}
