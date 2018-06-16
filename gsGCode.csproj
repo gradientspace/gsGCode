@@ -56,6 +56,7 @@
     <Compile Include="GCodeLine.cs" />
     <Compile Include="settings\FlashforgeSettings.cs" />
     <Compile Include="settings\MonopriceSettings.cs" />
+    <Compile Include="settings\PrusaSettings.cs" />
     <Compile Include="writers\BaseGCodeWriter.cs" />
     <Compile Include="writers\StandardGCodeWriter.cs" />
     <Compile Include="builders\IGCodeAccumulator.cs" />
