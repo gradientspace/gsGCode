@@ -25,7 +25,9 @@ namespace gs
 			OmitDuplicateZ = true;
 			OmitDuplicateF = true;
 			OmitDuplicateE = true;
-		}
+
+            HomeSequenceF =  StandardHomeSequence;
+        }
 
 
 		//public override void BeginRetract(Vector3d pos, double feedRate, double extrudeDist, string comment = null) {
@@ -56,8 +58,13 @@ namespace gs
 		}
 
 
+        /// <summary>
+        /// Replace this to run your own home sequence
+        /// </summary>
+        public Action<GCodeBuilder> HomeSequenceF;
 
-		public enum HeaderState
+
+        public enum HeaderState
 		{
 			AfterComments,
 			AfterTemperature,
@@ -75,9 +82,17 @@ namespace gs
 		void AppendHeader_StandardRepRap() {
 
             base.AddStandardHeader(Settings);
-			Builder.AddCommentLine("; Model: " + Settings.Machine.ManufacturerName + " " + Settings.Machine.ModelIdentifier);
 
-			HeaderCustomizerF(HeaderState.AfterComments, Builder);
+            DisableFan();
+
+            HeaderCustomizerF(HeaderState.AfterComments, Builder);
+
+            /*
+             * Configure temperatures
+             */
+
+            // do this first so it happens while bed heats
+            SetExtruderTargetTemp(Settings.ExtruderTempC);
 
             // M190
             if (Settings.Machine.HasHeatedBed) {
@@ -90,23 +105,19 @@ namespace gs
             // M109
             SetExtruderTargetTempAndWait(Settings.ExtruderTempC);
 
+
             HeaderCustomizerF(HeaderState.AfterTemperature, Builder);
 
 			Builder.BeginGLine(21, "units=mm");
 			Builder.BeginGLine(90, "absolute positions");
 			Builder.BeginMLine(82, "absolute extruder position");
 
-			DisableFan();
-
 			HeaderCustomizerF(HeaderState.BeforeHome, Builder);
 
-			Builder.BeginGLine(28, "home x/y").AppendI("X", 0).AppendI("Y", 0);
-			currentPos.x = currentPos.y = 0;
-            PositionShift = 0.5 * new Vector2d(Settings.Machine.BedSizeXMM, Settings.Machine.BedSizeYMM);
-				
-			Builder.BeginGLine(28, "home z").AppendI("Z", 0);
-			currentPos.z = 0;
+            HomeSequenceF(Builder);
 
+            PositionShift = 0.5 * new Vector2d(Settings.Machine.BedSizeXMM, Settings.Machine.BedSizeYMM);
+            currentPos = Vector3d.Zero;
 
 			HeaderCustomizerF(HeaderState.BeforePrime, Builder);
 
@@ -165,6 +176,16 @@ namespace gs
 
 			Builder.EndLine();		// need to force this
 		}
+
+
+
+
+        public virtual void StandardHomeSequence(GCodeBuilder builder)
+        {
+            Builder.BeginGLine(28, "home x/y").AppendI("X", 0).AppendI("Y", 0);
+            Builder.BeginGLine(28, "home z").AppendI("Z", 0);
+        }
+
 
 	}
 

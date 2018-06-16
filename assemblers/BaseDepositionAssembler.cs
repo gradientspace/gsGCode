@@ -503,8 +503,8 @@ namespace gs
 
         protected virtual void AddStandardHeader(SingleMaterialFFFSettings Settings)
         {
-            Builder.AddCommentLine("; Generated on " + DateTime.Now.ToLongDateString());
-            Builder.AddCommentLine(string.Format("; For {0} {1}", Settings.Machine.ManufacturerName, Settings.Machine.ModelIdentifier));
+            Builder.AddCommentLine("; Generated on " + DateTime.Now.ToLongDateString() + " by Gradientspace gsSlicer");
+            Builder.AddCommentLine(string.Format("; Printer: {0} {1}", Settings.Machine.ManufacturerName, Settings.Machine.ModelIdentifier));
             Builder.AddCommentLine("; Print Settings");
             Builder.AddCommentLine("; Layer Height: " + Settings.LayerHeightMM);
             Builder.AddCommentLine("; Nozzle Diameter: " + Settings.Machine.NozzleDiamMM + "  Filament Diameter: " + Settings.Machine.FilamentDiamMM);
