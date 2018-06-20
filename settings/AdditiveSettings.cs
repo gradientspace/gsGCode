@@ -218,6 +218,7 @@ namespace gs
 
 		public double OuterPerimeterSpeedX = 0.5;
 
+        public double FanSpeedX = 1.0;                  // default fan speed, fraction of max speed (generally unknown)
 
         /*
          * Shells
@@ -340,6 +341,7 @@ namespace gs
             to.RapidExtrudeSpeed = this.RapidExtrudeSpeed;
             to.MinExtrudeSpeed = this.MinExtrudeSpeed;
             to.OuterPerimeterSpeedX = this.OuterPerimeterSpeedX;
+            to.FanSpeedX = this.FanSpeedX;
 
             to.Shells = this.Shells;
             to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;

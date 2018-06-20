@@ -60,6 +60,7 @@ namespace gs
 
 
 		public override void EnableFan() {
+            // makerbot-style firmware does not support fan speed?
 			Builder.BeginMLine(126).AppendI("T",0);
 		}
 		public override void DisableFan() {

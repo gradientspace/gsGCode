@@ -50,8 +50,8 @@ namespace gs
 		}
 
 		public override void EnableFan() {
-			// [TODO] fan speed configuration?
-			Builder.BeginMLine(106, "fan on").AppendI("S", 255);
+            int fan_speed = (int)(Settings.FanSpeedX * 255.0);
+			Builder.BeginMLine(106, "fan on").AppendI("S", fan_speed);
 		}
 		public override void DisableFan() {
 			Builder.BeginMLine(107, "fan off");
