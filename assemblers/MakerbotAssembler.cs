@@ -165,7 +165,8 @@ namespace gs
 			in_retract = false;
 			in_travel = false;
 
-			UpdateProgress(0);
+            EnableFan();
+            UpdateProgress(0);
 		}
 
 

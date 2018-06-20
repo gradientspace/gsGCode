@@ -138,12 +138,13 @@ namespace gs
             AppendMoveTo(new Vector3d(NozzlePosition.x,NozzlePosition.y,0), Settings.ZTravelSpeed, "reset z");
             EndTravel();
 
-			ShowMessage("Print Started");
+            ShowMessage("Print Started");
 
 			in_retract = false;
 			in_travel = false;
 
-			UpdateProgress(0);
+            EnableFan();
+            UpdateProgress(0);
 		}
 
 
