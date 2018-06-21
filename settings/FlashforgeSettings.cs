@@ -45,6 +45,13 @@ namespace gs.info
         }
 
 
+        public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
+        {
+            yield return new FlashforgeSettings(Flashforge.Models.CreatorPro);
+            yield return new FlashforgeSettings(Flashforge.Models.Unknown);
+        }
+
+
         public string GPXModelFlag {
             get {
                 if (ModelEnum == Flashforge.Models.CreatorPro)

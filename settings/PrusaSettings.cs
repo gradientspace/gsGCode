@@ -10,10 +10,11 @@ namespace gs.info
         public const string UUID = "4530287d-cd23-416c-b74b-4876c385750a";
 
         public enum Models {
-            i3_MK3 = 0
+            Unknown = 0,
+            i3_MK3 = 1
         };
 
-        public const string UUID_Unknown = "9a4cc498-376a-4780-956c-d0e145751868";
+        public const string UUID_Unknown = "b7498970-b847-4a24-8e5c-2e7c0c4d417f";
         public const string UUID_I3_MK3 = "fc09f99c-aee0-45e9-bca3-3e088ccb0b55";
     }
 
@@ -32,6 +33,8 @@ namespace gs.info
 
             if (model == Prusa.Models.i3_MK3)
                 configure_i3_MK3();
+            else
+                configure_unknown();
         }
 
         public override T CloneAs<T>() {
@@ -40,9 +43,11 @@ namespace gs.info
             return copy as T;
         }
 
-        protected override void CopyFieldsTo(SingleMaterialFFFSettings to)
+
+        public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
         {
-            base.CopyFieldsTo(to);
+            yield return new PrusaSettings(Prusa.Models.i3_MK3);
+            yield return new PrusaSettings(Prusa.Models.Unknown);
         }
 
 
@@ -92,7 +97,54 @@ namespace gs.info
 
 
 
-		public BaseDepositionAssembler MakePrusaAssembler(
+        void configure_unknown()
+        {
+            Machine.ManufacturerName = "Prusa";
+            Machine.ManufacturerUUID = Prusa.UUID;
+            Machine.ModelIdentifier = "(Unknown)";
+            Machine.ModelUUID = Prusa.UUID_Unknown;
+            Machine.Class = MachineClass.PlasticFFFPrinter;
+            Machine.BedSizeXMM = 100;
+            Machine.BedSizeYMM = 100;
+            Machine.MaxHeightMM = 100;
+            Machine.NozzleDiamMM = 0.4;
+            Machine.FilamentDiamMM = 1.75;
+
+            Machine.MaxExtruderTempC = 230;
+            Machine.HasHeatedBed = false;
+            Machine.MaxBedTempC = 0;
+
+            Machine.HasAutoBedLeveling = false;
+            Machine.EnableAutoBedLeveling = false;
+
+            Machine.MaxExtrudeSpeedMMM = 60 * 60;
+            Machine.MaxTravelSpeedMMM = 80 * 60;
+            Machine.MaxZTravelSpeedMMM = 23 * 60;
+            Machine.MaxRetractSpeedMMM = 20 * 60;
+            Machine.MinLayerHeightMM = 0.1;
+            Machine.MaxLayerHeightMM = 0.3;
+
+            LayerHeightMM = 0.2;
+
+            ExtruderTempC = 200;
+            HeatedBedTempC = 0;
+
+            SolidFillNozzleDiamStepX = 1.0;
+            RetractDistanceMM = 1.0;
+
+            RetractSpeed = Machine.MaxRetractSpeedMMM;
+            ZTravelSpeed = Machine.MaxZTravelSpeedMMM;
+            RapidTravelSpeed = Machine.MaxTravelSpeedMMM;
+            CarefulExtrudeSpeed = 20 * 60;
+            RapidExtrudeSpeed = Machine.MaxExtrudeSpeedMMM;
+            OuterPerimeterSpeedX = 0.5;
+        }
+
+
+
+
+
+        public BaseDepositionAssembler MakePrusaAssembler(
 			GCodeBuilder builder, SingleMaterialFFFSettings settings)
 		{
 			var asm = new RepRapAssembler(builder, settings);

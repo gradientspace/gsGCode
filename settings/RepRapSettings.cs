@@ -39,6 +39,11 @@ namespace gs.info
             return copy as T;
         }
 
+        public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
+        {
+            yield return new RepRapSettings(RepRap.Models.Unknown);
+        }
+
 
         void configure_unknown()
         {

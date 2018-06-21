@@ -54,6 +54,14 @@ namespace gs.info
         }
 
 
+        public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
+        {
+            yield return new MakerbotSettings(Makerbot.Models.Replicator2);
+            yield return new MakerbotSettings(Makerbot.Models.Unknown);
+        }
+
+
+
         public string GPXModelFlag {
             get {
                 if (ModelEnum == Makerbot.Models.Replicator2)

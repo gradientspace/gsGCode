@@ -10,7 +10,8 @@ namespace gs.info
 		public const string UUID = "10dd0db9-df41-4b3e-8b73-d345c408b5ff";
 
         public enum Models {
-            Plus = 0
+            Unknown = 0,
+            Plus = 1
         };
 
         public const string UUID_Unknown = "9a4cc498-376a-4780-956c-d0e145751868";
@@ -32,6 +33,8 @@ namespace gs.info
 
 			if (model == Printrbot.Models.Plus)
                 configure_Plus();
+            else
+                configure_unknown();
         }
 
         public override T CloneAs<T>() {
@@ -40,10 +43,13 @@ namespace gs.info
             return copy as T;
         }
 
-        protected override void CopyFieldsTo(SingleMaterialFFFSettings to)
+
+        public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
         {
-            base.CopyFieldsTo(to);
+            yield return new PrintrbotSettings(Printrbot.Models.Plus);
+            yield return new PrintrbotSettings(Printrbot.Models.Unknown);
         }
+
 
 
         void configure_Plus()
@@ -94,7 +100,56 @@ namespace gs.info
 
 
 
-		public BaseDepositionAssembler MakePrintrbotAssembler(
+        void configure_unknown()
+        {
+            Machine.ManufacturerName = "Printrbot";
+            Machine.ManufacturerUUID = Printrbot.UUID;
+            Machine.ModelIdentifier = "(Unknown)";
+            Machine.ModelUUID = Printrbot.UUID_Unknown;
+            Machine.Class = MachineClass.PlasticFFFPrinter;
+            Machine.BedSizeXMM = 100;
+            Machine.BedSizeYMM = 100;
+            Machine.MaxHeightMM = 100;
+            Machine.NozzleDiamMM = 0.4;
+            Machine.FilamentDiamMM = 1.75;
+
+            Machine.MaxExtruderTempC = 230;
+            Machine.HasHeatedBed = false;
+            Machine.MaxBedTempC = 0;
+
+            Machine.HasAutoBedLeveling = false;
+            Machine.EnableAutoBedLeveling = false;
+
+            Machine.MaxExtrudeSpeedMMM = 60 * 60;
+            Machine.MaxTravelSpeedMMM = 80 * 60;
+            Machine.MaxZTravelSpeedMMM = 23 * 60;
+            Machine.MaxRetractSpeedMMM = 20 * 60;
+            Machine.MinLayerHeightMM = 0.1;
+            Machine.MaxLayerHeightMM = 0.3;
+
+            LayerHeightMM = 0.2;
+
+            ExtruderTempC = 200;
+            HeatedBedTempC = 0;
+
+            SolidFillNozzleDiamStepX = 1.0;
+            RetractDistanceMM = 1.0;
+
+            RetractSpeed = Machine.MaxRetractSpeedMMM;
+            ZTravelSpeed = Machine.MaxZTravelSpeedMMM;
+            RapidTravelSpeed = Machine.MaxTravelSpeedMMM;
+            CarefulExtrudeSpeed = 20 * 60;
+            RapidExtrudeSpeed = Machine.MaxExtrudeSpeedMMM;
+            OuterPerimeterSpeedX = 0.5;
+        }
+
+
+
+
+
+
+
+        public BaseDepositionAssembler MakePrintrbotAssembler(
 			GCodeBuilder builder, SingleMaterialFFFSettings settings)
 		{
 			var asm = new RepRapAssembler(builder, settings);
