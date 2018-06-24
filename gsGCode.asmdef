@@ -1,0 +1,10 @@
+{
+    "name": "gsGCode",
+    "references": [
+        "geometry3Sharp"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

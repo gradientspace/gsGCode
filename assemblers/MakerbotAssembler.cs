@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using g3;
-using gs.info;
 
 namespace gs
 {
