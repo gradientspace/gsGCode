@@ -271,7 +271,8 @@ namespace gs
 		public double SupportRegionJoinTolX = 2.0;		 // support regions within this distance will be merged via topological dilation. Multiplier on NozzleDiamMM.
         public bool EnableSupportReleaseOpt = true;      // should we use support release optimization
         public double SupportReleaseGap = 0.2f;          // how much space do we leave
-        public bool SupportMinZTips = true;   // turn on/off detection of support 'tip' regions, ie tiny islands. Often spurious.
+        public double SupportMinDimension = 1.5;         // minimal size of support polygons
+        public bool SupportMinZTips = true;              // turn on/off detection of support 'tip' regions, ie tiny islands.
 		public double SupportPointDiam = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
 		public int SupportPointSides = 4;                // number of vertices for support-point polygons (circles)
 
@@ -369,6 +370,7 @@ namespace gs
 			to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
             to.EnableSupportReleaseOpt = this.EnableSupportReleaseOpt;
             to.SupportReleaseGap = this.SupportReleaseGap;
+            to.SupportMinDimension = this.SupportMinDimension;
             to.SupportMinZTips = this.SupportMinZTips;
             to.SupportPointDiam = this.SupportPointDiam;
 			to.SupportPointSides = this.SupportPointSides;
