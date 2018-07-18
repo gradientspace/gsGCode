@@ -31,8 +31,8 @@ namespace gs
 		/// Add a comment to output. Will add necessary comment prefix if not provided.
 		/// </summary>
 		public virtual GCodeBuilder AddCommentLine(string comment) {
-			if ( comment[0] != ';' && comment[0] != '(' )
-				comment = ";" + comment;
+			//if ( comment[0] != ';' && comment[0] != '(' )
+			//	comment = ";" + comment;
 			AddLine( 
 		        new GCodeLine(next_line_number(), GCodeLine.LType.Comment, comment) );
 			return this;

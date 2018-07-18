@@ -18,11 +18,28 @@ namespace gs
 		}
 
 
+        public enum CommentStyles
+        {
+            Semicolon = 0,
+            Bracket = 1
+        }
+        public CommentStyles CommentStyle = CommentStyles.Semicolon; 
+
+
+
 		public override void WriteLine(GCodeLine line, StreamWriter outStream) 
 		{
 			if ( line.type == GCodeLine.LType.Comment ) {
-				outStream.WriteLine(line.comment);
-				return;
+                if (CommentStyle == CommentStyles.Semicolon) {
+                    if (line.comment[0] != ';')
+                        outStream.Write(";");
+                    outStream.WriteLine(line.comment);
+                } else {
+                    outStream.Write("(");
+                    outStream.Write(line.comment);
+                    outStream.WriteLine(")");
+                }
+                return;
 			} else if ( line.type == GCodeLine.LType.UnknownString ) {
 				outStream.WriteLine(line.orig_string);
 				return;
@@ -69,9 +86,15 @@ namespace gs
 
 
 			if ( line.comment != null &&  line.comment.Length > 0 ) {
-				if ( line.comment[0] != '(' && line.comment[0] != ';' )
-					b.Append(';');
-				b.Append(line.comment);
+                if (CommentStyle == CommentStyles.Semicolon) {
+                    if (line.comment[0] != '(' && line.comment[0] != ';')
+                        b.Append(';');
+                    b.Append(line.comment);
+                } else {
+                    b.Append("(");
+                    b.Append(line.comment);
+                    b.Append(")");
+                }
 			}
 
 			outStream.WriteLine(b.ToString());
