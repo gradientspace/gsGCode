@@ -76,6 +76,7 @@ namespace gs
 
 		void BeginTravel();
 		void BeginDeposition();
+        void BeginCut();
 
 		// for hacks
 		void CustomCommand(int code, object o);

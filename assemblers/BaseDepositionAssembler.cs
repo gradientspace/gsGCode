@@ -7,8 +7,13 @@ using gs;
 
 namespace gs
 {
-	public interface IDepositionAssembler
-	{
+
+    public interface IGCodeAssembler
+    {
+    }
+
+	public interface IDepositionAssembler : IGCodeAssembler
+    {
 	}
 
 

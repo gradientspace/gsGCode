@@ -43,12 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="assemblers\BaseMillingAssembler.cs" />
     <Compile Include="assemblers\BaseDepositionAssembler.cs" />
     <Compile Include="assemblers\ExtrusionMath.cs" />
+    <Compile Include="assemblers\GenericMillingAssembler.cs" />
     <Compile Include="assemblers\RepRapAssembler.cs" />
     <Compile Include="GCodeFile.cs" />
     <Compile Include="interpreters\BiesseInterpreter.cs" />
     <Compile Include="interpreters\GCodeInterpreter.cs" />
+    <Compile Include="interpreters\ThreeAxisCNCInterpreter.cs" />
     <Compile Include="parsers\GCodeUtil.cs" />
     <Compile Include="parsers\GenericGCodeParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

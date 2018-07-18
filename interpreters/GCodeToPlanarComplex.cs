@@ -27,8 +27,11 @@ namespace gs
 		}
 		public void BeginDeposition() {
 		}
+        public void BeginCut()
+        {
+        }
 
-		public void LinearMoveToAbsolute2d(LinearMoveData move)
+        public void LinearMoveToAbsolute2d(LinearMoveData move)
         {
 			Vector2d P2 = move.position.xy;
             Complex.Add(new Segment2d(P, P2));
