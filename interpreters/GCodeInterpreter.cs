@@ -45,7 +45,7 @@ namespace gs
 			source = null;
 		}
 		public LinearMoveData(Vector3d pos, double rateIn = GCodeUtil.UnspecifiedValue) {
-			position = new Vector3d(pos.x, pos.y, GCodeUtil.UnspecifiedValue);
+            position = pos;
 			rate = rateIn;
 			extrude = GCodeUtil.UnspecifiedPosition;
 			source = null;
