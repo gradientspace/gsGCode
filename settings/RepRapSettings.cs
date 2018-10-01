@@ -33,10 +33,11 @@ namespace gs.info
                 configure_unknown();
         }
 
-        public override T CloneAs<T>() {
-            RepRapSettings copy = new RepRapSettings(this.ModelEnum);
+        public override T CloneAs<T>()
+        {
+            T copy = new T();
             this.CopyFieldsTo(copy);
-            return copy as T;
+            return copy;
         }
 
         public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()

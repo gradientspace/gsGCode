@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using g3;
 
 namespace gs
@@ -130,55 +130,132 @@ namespace gs
     }
 
 
+    public interface IPlanarAdditiveSettings
+    {
+        string Identifier { get; set; }
+        double LayerHeightMM { get; set; }
+        T CloneAs<T>() where T : IPlanarAdditiveSettings, new();
 
-    public abstract class PlanarAdditiveSettings
-	{
+    }
+
+    public abstract class PlanarAdditiveSettings : IPlanarAdditiveSettings
+    {
         /// <summary>
         /// This is the "name" of this settings (eg user identifier)
         /// </summary>
-        public string Identifier = "Defaults";
+        private string identifier = "Defaults";
+        public string Identifier { get => identifier; set => identifier = value; }
 
-		public double LayerHeightMM = 0.2;
+        public double LayerHeightMM { get; set; } = 0.2;
 
 
-        public string ClassTypeName {
+        public string ClassTypeName
+        {
             get { return GetType().ToString(); }
         }
 
 
         public abstract MachineInfo BaseMachine { get; set; }
 
-        public abstract T CloneAs<T>() where T : class;
-        protected virtual void CopyFieldsTo(PlanarAdditiveSettings to)
+        public virtual T CloneAs<T>() where T : IPlanarAdditiveSettings, new()
+        {
+            T to = new T();
+            this.CopyFieldsTo(to);
+            return to;
+        }
+
+        protected virtual void CopyFieldsTo(IPlanarAdditiveSettings to)
         {
             to.Identifier = this.Identifier;
             to.LayerHeightMM = this.LayerHeightMM;
         }
     }
 
+    public interface ISingleMaterialFFFSettings : IPlanarAdditiveSettings
+    {
+        FFFMachineInfo Machine { get; set; }
+        double RapidTravelSpeed { get; set; }
+        double CarefulExtrudeSpeed { get; set; }
+        double RapidExtrudeSpeed { get; set; }
+        double MinExtrudeSpeed { get; set; }
+        double OuterPerimeterSpeedX { get; set; }
+        double BridgeExtrudeSpeedX { get; set; }
+        Interval1i LayerRangeFilter { get; set; }
+        int FloorLayers { get; set; }
+        int RoofLayers { get; set; }
+        double ZTravelSpeed { get; set; }
+        bool OuterShellLast { get; set; }
+        double MinLayerTime { get; set; }
+        double SparseLinearInfillStepX { get; set; }
+        double SparseFillBorderOverlapX { get; set; }
+        bool EnableSupportShell { get; set; }
+        double SupportSpacingStepX { get; set; }
+        bool EnableBridging { get; set; }
+        int Shells { get; set; }
+        int InteriorSolidRegionShells { get; set; }
+        bool ClipSelfOverlaps { get; set; }
+        double SelfOverlapToleranceX { get; set; }
+        double SolidFillBorderOverlapX { get; set; }
+        bool GenerateSupport { get; set; }
+        double SupportOverhangAngleDeg { get; set; }
+        double SupportRegionJoinTolX { get; set; }
+        double SupportSolidSpace { get; set; }
+        double SupportAreaOffsetX { get; set; }
+        double SupportMinDimension { get; set; }
+        double SupportPointDiam { get; set; }
+        int SupportPointSides { get; set; }
+        double MaxBridgeWidthMM { get; set; }
+        double RetractSpeed { get; set; }
+        bool EnableRetraction { get; set; }
+        double RetractDistanceMM { get; set; }
+        double MinRetractTravelLength { get; set; }
+        double SupportVolumeScale { get; set; }
+        double BridgeVolumeScale { get; set; }
+        bool SupportMinZTips { get; set; }
+        int ExtruderTempC { get; set; }
+        int HeatedBedTempC { get; set; }
+        double FanSpeedX { get; set; }
+        double ShellsFillNozzleDiamStepX { get; set; }
+        double SolidFillNozzleDiamStepX { get; set; }
+        int StartLayers { get; set; }
+        double StartLayerHeightMM { get; set; }
+        bool EnableSupportReleaseOpt { get; set; }
+        double SupportReleaseGap { get; set; }
+        double BridgeFillNozzleDiamStepX { get; set; }
 
+        double SolidFillPathSpacingMM();
+        double ShellsFillPathSpacingMM();
+        double BridgeFillPathSpacingMM();
 
-    public class SingleMaterialFFFSettings : PlanarAdditiveSettings
-	{
+        new T CloneAs<T>() where T : ISingleMaterialFFFSettings, new();
+    }
+
+    public class SingleMaterialFFFSettings : PlanarAdditiveSettings, ISingleMaterialFFFSettings
+    {
         // This is a bit of an odd place for this, but settings are where we actually
         // know what assembler we should be using...
-        public virtual AssemblerFactoryF AssemblerType() {
+        public virtual AssemblerFactoryF AssemblerType()
+        {
             throw new NotImplementedException("Settings.AssemblerType() not provided");
         }
 
 
         protected FFFMachineInfo machineInfo;
-        public FFFMachineInfo Machine {
+        public FFFMachineInfo Machine
+        {
             get { if (machineInfo == null) machineInfo = new FFFMachineInfo(); return machineInfo; }
             set { machineInfo = value; }
         }
 
 
-        public override MachineInfo BaseMachine {
+        public override MachineInfo BaseMachine
+        {
             get { return Machine; }
-            set { if (value is FFFMachineInfo)
+            set
+            {
+                if (value is FFFMachineInfo)
                     machineInfo = value as FFFMachineInfo;
-                 else
+                else
                     throw new Exception("SingleMaterialFFFSettings.Machine.set: type is not FFFMachineInfo!");
             }
         }
@@ -187,118 +264,117 @@ namespace gs
          * Temperatures
          */
 
-        public int ExtruderTempC = 210;
-        public int HeatedBedTempC = 0;
+        public int ExtruderTempC { get; set; } = 210;
+        public int HeatedBedTempC { get; set; } = 0;
 
         /*
 		 * Distances.
 		 * All units are mm
 		 */
 
-        public bool EnableRetraction = true;
-		public double RetractDistanceMM = 1.3;
-        public double MinRetractTravelLength = 2.5;     // don't retract if we are travelling less than this distance
+        public bool EnableRetraction { get; set; } = true;
+        public double RetractDistanceMM { get; set; } = 1.3;
+        public double MinRetractTravelLength { get; set; } = 2.5;     // don't retract if we are travelling less than this distance
 
 
-		/*
+        /*
 		 * Speeds. 
 		 * All units are mm/min = (mm/s * 60)
 		 */
 
-		// these are all in units of millimeters/minute
-		public double RetractSpeed = 25 * 60;   // 1500
+        // these are all in units of millimeters/minute
+        public double RetractSpeed { get; set; } = 25 * 60;   // 1500
 
-		public double ZTravelSpeed = 23 * 60;   // 1380
+        public double ZTravelSpeed { get; set; } = 23 * 60;   // 1380
 
-		public double RapidTravelSpeed = 150 * 60;  // 9000
+        public double RapidTravelSpeed { get; set; } = 150 * 60;  // 9000
+        public double CarefulExtrudeSpeed { get; set; } = 30 * 60;      // 1800
+        public double RapidExtrudeSpeed { get; set; } = 90 * 60;      // 5400
+        public double MinExtrudeSpeed { get; set; } = 20 * 60;        // 600
 
-		public double CarefulExtrudeSpeed = 30 * 60;  	// 1800
-		public double RapidExtrudeSpeed = 90 * 60;      // 5400
-        public double MinExtrudeSpeed = 20 * 60;        // 600
+        public double OuterPerimeterSpeedX { get; set; } = 0.5;
 
-		public double OuterPerimeterSpeedX = 0.5;
-
-        public double FanSpeedX = 1.0;                  // default fan speed, fraction of max speed (generally unknown)
+        public double FanSpeedX { get; set; } = 1.0;                  // default fan speed, fraction of max speed (generally unknown)
 
         /*
          * Shells
          */
-        public int Shells = 2;
-        public int InteriorSolidRegionShells = 0;       // how many shells to add around interior solid regions (eg roof/floor)
-		public bool OuterShellLast = false;				// do outer shell last (better quality but worse precision)
+        public int Shells { get; set; } = 2;
+        public int InteriorSolidRegionShells { get; set; } = 0;       // how many shells to add around interior solid regions (eg roof/floor)
+        public bool OuterShellLast { get; set; } = false;               // do outer shell last (better quality but worse precision)
 
-		/*
+        /*
 		 * Roof/Floors
 		 */
-		public int RoofLayers = 2;
-		public int FloorLayers = 2;
+        public int RoofLayers { get; set; } = 2;
+        public int FloorLayers { get; set; } = 2;
 
         /*
          *  Solid fill settings
          */
-        public double ShellsFillNozzleDiamStepX = 1.0;      // multipler on Machine.NozzleDiamMM, defines spacing between adjacent
-                                                            // nested shells/perimeters. If < 1, they overlap.
-        public double SolidFillNozzleDiamStepX = 1.0;       // multipler on Machine.NozzleDiamMM, defines spacing between adjacent
-                                                            // solid fill parallel lines. If < 1, they overlap.
-        public double SolidFillBorderOverlapX = 0.25f;      // this is a multiplier on Machine.NozzleDiamMM, defines how far we
-                                                            // overlap solid fill onto border shells (if 0, no overlap)
+        public double ShellsFillNozzleDiamStepX { get; set; } = 1.0;      // multipler on Machine.NozzleDiamMM, defines spacing between adjacent
+                                                                          // nested shells/perimeters. If < 1, they overlap.
+        public double SolidFillNozzleDiamStepX { get; set; } = 1.0;       // multipler on Machine.NozzleDiamMM, defines spacing between adjacent
+                                                                          // solid fill parallel lines. If < 1, they overlap.
+        public double SolidFillBorderOverlapX { get; set; } = 0.25f;      // this is a multiplier on Machine.NozzleDiamMM, defines how far we
+                                                                          // overlap solid fill onto border shells (if 0, no overlap)
 
         /*
 		 * Sparse infill settings
 		 */
-        public double SparseLinearInfillStepX = 5.0;      // this is a multiplier on FillPathSpacingMM
+        public double SparseLinearInfillStepX { get; set; } = 5.0;      // this is a multiplier on FillPathSpacingMM
 
-        public double SparseFillBorderOverlapX = 0.25f;     // this is a multiplier on Machine.NozzleDiamMM, defines how far we
-                                                            // overlap solid fill onto border shells (if 0, no overlap)
+        public double SparseFillBorderOverlapX { get; set; } = 0.25f;     // this is a multiplier on Machine.NozzleDiamMM, defines how far we
+                                                                          // overlap solid fill onto border shells (if 0, no overlap)
 
         /*
          * Start layer controls
          */
-        public int StartLayers = 0;                      // number of start layers, special handling
-        public double StartLayerHeightMM = 0;            // height of start layers. If 0, same as regular layers
+        public int StartLayers { get; set; } = 0;                      // number of start layers, special handling
+        public double StartLayerHeightMM { get; set; } = 0;            // height of start layers. If 0, same as regular layers
 
 
         /*
          * Support settings
          */
-        public bool GenerateSupport = true;              // should we auto-generate support
-        public double SupportOverhangAngleDeg = 35;      // standard "support angle"
-        public double SupportSpacingStepX = 5.0;         // usage depends on support technique?           
-        public double SupportVolumeScale = 1.0;          // multiplier on extrusion volume
-        public bool EnableSupportShell = true;           // should we print a shell around support areas
-        public double SupportAreaOffsetX = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
-        public double SupportSolidSpace = 0.35f;         // how much space to leave between model and support
-		public double SupportRegionJoinTolX = 2.0;		 // support regions within this distance will be merged via topological dilation. Multiplier on NozzleDiamMM.
-        public bool EnableSupportReleaseOpt = true;      // should we use support release optimization
-        public double SupportReleaseGap = 0.2f;          // how much space do we leave
-        public double SupportMinDimension = 1.5;         // minimal size of support polygons
-        public bool SupportMinZTips = true;              // turn on/off detection of support 'tip' regions, ie tiny islands.
-		public double SupportPointDiam = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
-		public int SupportPointSides = 4;                // number of vertices for support-point polygons (circles)
+        public bool GenerateSupport { get; set; } = true;              // should we auto-generate support
+        public double SupportOverhangAngleDeg { get; set; } = 35;      // standard "support angle"
+        public double SupportSpacingStepX { get; set; } = 5.0;         // usage depends on support technique?           
+        public double SupportVolumeScale { get; set; } = 1.0;          // multiplier on extrusion volume
+        public bool EnableSupportShell { get; set; } = true;           // should we print a shell around support areas
+        public double SupportAreaOffsetX { get; set; } = -0.5;         // 2D inset/outset added to support regions. Multiplier on Machine.NozzleDiamMM.
+        public double SupportSolidSpace { get; set; } = 0.35f;         // how much space to leave between model and support
+        public double SupportRegionJoinTolX { get; set; } = 2.0;		 // support regions within this distance will be merged via topological dilation. Multiplier on NozzleDiamMM.
+        public bool EnableSupportReleaseOpt { get; set; } = true;      // should we use support release optimization
+        public double SupportReleaseGap { get; set; } = 0.2f;          // how much space do we leave
+        public double SupportMinDimension { get; set; } = 1.5;         // minimal size of support polygons
+        public bool SupportMinZTips { get; set; } = true;              // turn on/off detection of support 'tip' regions, ie tiny islands.
+        public double SupportPointDiam { get; set; } = 2.5f;           // width of per-layer support "points" (keep larger than SupportMinDimension!)
+        public int SupportPointSides { get; set; } = 4;                // number of vertices for support-point polygons (circles)
 
 
-		/*
+        /*
 		 * Bridging settings
 		 */
-		public bool EnableBridging = true;
-		public double MaxBridgeWidthMM = 10.0;
-		public double BridgeFillNozzleDiamStepX = 0.85;  // multiplier on FillPathSpacingMM
-		public double BridgeVolumeScale = 1.0;           // multiplier on extrusion volume
-		public double BridgeExtrudeSpeedX = 0.5;		 // multiplier on CarefulExtrudeSpeed
+        public bool EnableBridging { get; set; } = true;
+        public double MaxBridgeWidthMM { get; set; } = 10.0;
+        public double BridgeFillNozzleDiamStepX { get; set; } = 0.85;  // multiplier on FillPathSpacingMM
+        public double BridgeVolumeScale { get; set; } = 1.0;           // multiplier on extrusion volume
+        public double BridgeExtrudeSpeedX { get; set; } = 0.5;		 // multiplier on CarefulExtrudeSpeed
 
 
         /*
          * Toolpath filtering options
          */
-        public double MinLayerTime = 5.0;                // minimum layer time in seconds
-        public bool ClipSelfOverlaps = false;            // if true, try to remove portions of toolpaths that will self-overlap
-        public double SelfOverlapToleranceX = 0.75;      // what counts as 'self-overlap'. this is a multiplier on NozzleDiamMM
+        public double MinLayerTime { get; set; } = 5.0;                // minimum layer time in seconds
+        public bool ClipSelfOverlaps { get; set; } = false;            // if true, try to remove portions of toolpaths that will self-overlap
+        public double SelfOverlapToleranceX { get; set; } = 0.75;      // what counts as 'self-overlap'. this is a multiplier on NozzleDiamMM
 
         /*
          * Debug/Utility options
          */
 
-        public Interval1i LayerRangeFilter = new Interval1i(0, 999999999);   // only compute slices in this range
+        public Interval1i LayerRangeFilter { get; set; } = new Interval1i(0, 999999999);   // only compute slices in this range
 
 
 
@@ -307,27 +383,30 @@ namespace gs
          * functions that calculate derived values
          * NOTE: these cannot be properties because then they will be json-serialized!
          */
-        public double ShellsFillPathSpacingMM() {
+        public double ShellsFillPathSpacingMM()
+        {
             return Machine.NozzleDiamMM * ShellsFillNozzleDiamStepX;
         }
-        public double SolidFillPathSpacingMM() {
+        public double SolidFillPathSpacingMM()
+        {
             return Machine.NozzleDiamMM * SolidFillNozzleDiamStepX;
         }
-        public double BridgeFillPathSpacingMM() {
-			return Machine.NozzleDiamMM * BridgeFillNozzleDiamStepX;
-        }
-
-
-        public override T CloneAs<T>()
+        public double BridgeFillPathSpacingMM()
         {
-            SingleMaterialFFFSettings copy = new SingleMaterialFFFSettings();
-            this.CopyFieldsTo(copy);
-            return copy as T;
+            return Machine.NozzleDiamMM * BridgeFillNozzleDiamStepX;
         }
-        protected virtual void CopyFieldsTo(SingleMaterialFFFSettings to)
+
+
+        //public override T CloneAs<T> () 
+        //{
+        //    T copy = new T();
+        //    this.CopyFieldsTo(copy);
+        //    return copy as T;
+        //}
+        protected virtual void CopyFieldsTo(ISingleMaterialFFFSettings to)
         {
             base.CopyFieldsTo(to);
-            to.machineInfo = this.machineInfo.CloneAs<FFFMachineInfo>();
+            to.Machine = this.machineInfo.CloneAs<FFFMachineInfo>();
 
             to.ExtruderTempC = this.ExtruderTempC;
             to.HeatedBedTempC = this.HeatedBedTempC;
@@ -346,13 +425,13 @@ namespace gs
 
             to.Shells = this.Shells;
             to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;
-			to.OuterShellLast = this.OuterShellLast;
+            to.OuterShellLast = this.OuterShellLast;
             to.RoofLayers = this.RoofLayers;
             to.FloorLayers = this.FloorLayers;
 
             to.ShellsFillNozzleDiamStepX = this.ShellsFillNozzleDiamStepX;
             to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
-			to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
+            to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
 
             to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
             to.SparseFillBorderOverlapX = this.SparseFillBorderOverlapX;
@@ -361,25 +440,25 @@ namespace gs
             to.StartLayerHeightMM = this.StartLayerHeightMM;
 
             to.GenerateSupport = this.GenerateSupport;
-			to.SupportOverhangAngleDeg = this.SupportOverhangAngleDeg;
+            to.SupportOverhangAngleDeg = this.SupportOverhangAngleDeg;
             to.SupportSpacingStepX = this.SupportSpacingStepX;
             to.SupportVolumeScale = this.SupportVolumeScale;
-			to.EnableSupportShell = this.EnableSupportShell;
-			to.SupportAreaOffsetX = this.SupportAreaOffsetX;
-			to.SupportSolidSpace = this.SupportSolidSpace;
-			to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
+            to.EnableSupportShell = this.EnableSupportShell;
+            to.SupportAreaOffsetX = this.SupportAreaOffsetX;
+            to.SupportSolidSpace = this.SupportSolidSpace;
+            to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
             to.EnableSupportReleaseOpt = this.EnableSupportReleaseOpt;
             to.SupportReleaseGap = this.SupportReleaseGap;
             to.SupportMinDimension = this.SupportMinDimension;
             to.SupportMinZTips = this.SupportMinZTips;
             to.SupportPointDiam = this.SupportPointDiam;
-			to.SupportPointSides = this.SupportPointSides;
+            to.SupportPointSides = this.SupportPointSides;
 
-			to.EnableBridging = this.EnableBridging;
-			to.MaxBridgeWidthMM = this.MaxBridgeWidthMM;
-			to.BridgeFillNozzleDiamStepX = this.BridgeFillNozzleDiamStepX;
-			to.BridgeVolumeScale = this.BridgeVolumeScale;
-			to.BridgeExtrudeSpeedX = this.BridgeExtrudeSpeedX;
+            to.EnableBridging = this.EnableBridging;
+            to.MaxBridgeWidthMM = this.MaxBridgeWidthMM;
+            to.BridgeFillNozzleDiamStepX = this.BridgeFillNozzleDiamStepX;
+            to.BridgeVolumeScale = this.BridgeVolumeScale;
+            to.BridgeExtrudeSpeedX = this.BridgeExtrudeSpeedX;
 
 
             to.MinLayerTime = this.MinLayerTime;
@@ -389,6 +468,19 @@ namespace gs
             to.LayerRangeFilter = this.LayerRangeFilter;
         }
 
+        //public T CloneAs2<T>() where T : ISingleMaterialFFFSettings, new()
+        //{
+        //    T to = new T();
+        //    this.CopyFieldsTo(to);
+        //    return to;
+        //}
+
+        T ISingleMaterialFFFSettings.CloneAs<T>()
+        {
+            T to = new T();
+            this.CopyFieldsTo(to);
+            return to;
+        }
     }
 
 
@@ -397,18 +489,19 @@ namespace gs
     // just for naming...
     public class GenericRepRapSettings : SingleMaterialFFFSettings
     {
-        public override AssemblerFactoryF AssemblerType() {
+        public override AssemblerFactoryF AssemblerType()
+        {
             return RepRapAssembler.Factory;
         }
 
 
         public override T CloneAs<T>()
         {
-            GenericRepRapSettings copy = new GenericRepRapSettings();
+            T copy = new T();
             this.CopyFieldsTo(copy);
-            return copy as T;
+            return copy;
         }
-        
+
 
     }
 
