@@ -17,7 +17,7 @@ namespace gs
 	}
 
 
-    public delegate BaseDepositionAssembler AssemblerFactoryF(GCodeBuilder builder, SingleMaterialFFFSettings settings);
+    public delegate BaseDepositionAssembler AssemblerFactoryF(GCodeBuilder builder, ISingleMaterialFFFSettings settings);
 
 
     /// <summary>
@@ -144,6 +144,7 @@ namespace gs
             }
 		}
 
+
 		protected double currentFeed;
 		public double FeedRate 
 		{
@@ -155,6 +156,14 @@ namespace gs
 		{
 			get { return extruderA; }
 		}
+
+        // Total is accumulated + the current amount
+        private double accumulatedExtrusion = 0;
+        public double TotalExtrusion
+        {
+            get { return accumulatedExtrusion + ExtruderA; }
+        }
+
 
         protected bool in_retract;
         protected double retractA;
@@ -263,7 +272,8 @@ namespace gs
 
 
         // push an extrude move onto queue
-        protected virtual void queue_extrude(Vector3d toPos, double feedRate, double e, char extrudeChar, string comment, bool bIsRetract)
+        protected virtual void queue_extrude(Vector3d toPos, double feedRate, double e, 
+            char extrudeChar, string comment, bool bIsRetract)
         {
             Util.gDevAssert(InExtrude || bIsRetract);
             if (EnableBoundsChecking && PositionBounds.Contains(toPos.xy) == false)
@@ -411,6 +421,7 @@ namespace gs
 		{
             queue_extrude(new Vector3d(x, y, z), f, a, 'A', comment, false);
 		}
+
         protected virtual void AppendMoveToA(Vector3d pos, double f, double a, string comment = null)
         {
             AppendMoveToA(pos.x, pos.y, pos.z, f, a, comment);
@@ -443,6 +454,7 @@ namespace gs
 				throw new Exception("BaseDepositionAssembler.EndRetract: restart position is not same as start of retract!");
 			if (extrudeDist == -9999)
 				extrudeDist = retractA;
+
             queue_extrude_to(pos, feedRate, extrudeDist, (comment == null) ? "End Retract" : comment, true);
 			in_retract = false;
 		}
@@ -490,6 +502,7 @@ namespace gs
                 throw new Exception("BaseDepositionAssembler.AppendResetExtrudedLength: cannot reset during retract!");
             flush_extrude_queue();
             Builder.BeginGLine(92, "reset extruded length").AppendI("E", 0);
+            accumulatedExtrusion += extruderA;
             extruderA = 0;
         }
 
@@ -506,7 +519,7 @@ namespace gs
 
 
 
-        protected virtual void AddStandardHeader(SingleMaterialFFFSettings Settings)
+        protected virtual void AddStandardHeader(ISingleMaterialFFFSettings Settings)
         {
             Builder.AddCommentLine("; Generated on " + DateTime.Now.ToLongDateString() + " by Gradientspace gsSlicer");
             Builder.AddCommentLine(string.Format("; Printer: {0} {1}", Settings.Machine.ManufacturerName, Settings.Machine.ModelIdentifier));
@@ -525,12 +538,40 @@ namespace gs
             Builder.AddCommentLine(string.Format("; LayerRange: {0}-{1}", Settings.LayerRangeFilter.a, Settings.LayerRangeFilter.b));
         }
 
+        protected virtual void AddPrintTimeEstimate()
+        {
+
+        }
+
+        public virtual List<string> GenerateTotalExtrusionReport(ISingleMaterialFFFSettings settings)
+        {
+            double volume = TotalExtrusion * Math.PI * Math.Pow(settings.Machine.FilamentDiamMM / 2d, 2);
+            double mass = volume * settings.FilamentGramsPerCubicMM;
+            double cost = mass * settings.FilamentCostPerKG / 1000d;
+
+            List<string> result = new List<string>
+            {
+                "Total Extrusion Estimate",
+                "    Length: " + TotalExtrusion.ToString("N2") + " mm",
+                "    Volume: " + volume.ToString("N2") + " mm^3",
+                "    Mass: " + mass.ToString("N2") + " g",
+                "    Cost: $" + cost.ToString("N2")
+            };
+
+            return result;
+        }
+
+        protected virtual void AddTotalExtrusionEstimate(ISingleMaterialFFFSettings settings)
+        {
+            foreach (string s in GenerateTotalExtrusionReport(settings))
+            {
+                Builder.AddCommentLine(" " + s);
+            }
+        }
 
 
 
-
-
-        protected virtual void AddPrimeLine(SingleMaterialFFFSettings Settings)
+        protected virtual void AddPrimeLine(ISingleMaterialFFFSettings Settings)
         {
             Builder.AddCommentLine("---begin prime type=line");
 

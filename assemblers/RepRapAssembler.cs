@@ -10,15 +10,15 @@ namespace gs
 
 	public class RepRapAssembler : BaseDepositionAssembler
     {
-        public static BaseDepositionAssembler Factory(GCodeBuilder builder, SingleMaterialFFFSettings settings) {
+        public static BaseDepositionAssembler Factory(GCodeBuilder builder, ISingleMaterialFFFSettings settings) {
             return new RepRapAssembler(builder, settings);
         }
 
 
-		public SingleMaterialFFFSettings Settings;
+		public ISingleMaterialFFFSettings Settings;
 
 
-		public RepRapAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder, settings.Machine)
+		public RepRapAssembler(GCodeBuilder useBuilder, ISingleMaterialFFFSettings settings) : base(useBuilder, settings.Machine)
         {
 			Settings = settings;
 

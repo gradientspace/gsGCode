@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using g3;
 
 namespace gs
@@ -135,6 +135,7 @@ namespace gs
         string Identifier { get; set; }
         double LayerHeightMM { get; set; }
         T CloneAs<T>() where T : IPlanarAdditiveSettings, new();
+        void CopyFieldsFrom<T>(T other) where T : IPlanarAdditiveSettings;
 
     }
 
@@ -165,9 +166,15 @@ namespace gs
         }
 
         protected virtual void CopyFieldsTo(IPlanarAdditiveSettings to)
-        {
+        {            
             to.Identifier = this.Identifier;
             to.LayerHeightMM = this.LayerHeightMM;
+        }
+
+        public void CopyFieldsFrom<T>(T other) where T : IPlanarAdditiveSettings
+        {
+            this.Identifier = other.Identifier;
+            this.LayerHeightMM = other.LayerHeightMM;
         }
     }
 
@@ -222,12 +229,14 @@ namespace gs
         bool EnableSupportReleaseOpt { get; set; }
         double SupportReleaseGap { get; set; }
         double BridgeFillNozzleDiamStepX { get; set; }
+        double FilamentGramsPerCubicMM { get; set; }
+        double FilamentCostPerKG { get; set; }
 
         double SolidFillPathSpacingMM();
         double ShellsFillPathSpacingMM();
         double BridgeFillPathSpacingMM();
 
-        new T CloneAs<T>() where T : ISingleMaterialFFFSettings, new();
+        new void CopyFieldsFrom<T>(T other) where T : ISingleMaterialFFFSettings;
     }
 
     public class SingleMaterialFFFSettings : PlanarAdditiveSettings, ISingleMaterialFFFSettings
@@ -266,6 +275,10 @@ namespace gs
 
         public int ExtruderTempC { get; set; } = 210;
         public int HeatedBedTempC { get; set; } = 0;
+
+        // Material Info
+        public double FilamentCostPerKG { get; set; } = 19.19;
+        public double FilamentGramsPerCubicMM { get; set; } = 0.00125;
 
         /*
 		 * Distances.
@@ -396,92 +409,75 @@ namespace gs
             return Machine.NozzleDiamMM * BridgeFillNozzleDiamStepX;
         }
 
-
-        //public override T CloneAs<T> () 
-        //{
-        //    T copy = new T();
-        //    this.CopyFieldsTo(copy);
-        //    return copy as T;
-        //}
-        protected virtual void CopyFieldsTo(ISingleMaterialFFFSettings to)
+        void ISingleMaterialFFFSettings.CopyFieldsFrom<T>(T other) 
         {
-            base.CopyFieldsTo(to);
-            to.Machine = this.machineInfo.CloneAs<FFFMachineInfo>();
+            ((IPlanarAdditiveSettings)this).CopyFieldsFrom(other);
 
-            to.ExtruderTempC = this.ExtruderTempC;
-            to.HeatedBedTempC = this.HeatedBedTempC;
-            to.EnableRetraction = this.EnableRetraction;
-            to.RetractDistanceMM = this.RetractDistanceMM;
-            to.MinRetractTravelLength = this.MinRetractTravelLength;
+            this.Machine = other.Machine.CloneAs<FFFMachineInfo>();
 
-            to.RetractSpeed = this.RetractSpeed;
-            to.ZTravelSpeed = this.ZTravelSpeed;
-            to.RapidTravelSpeed = this.RapidTravelSpeed;
-            to.CarefulExtrudeSpeed = this.CarefulExtrudeSpeed;
-            to.RapidExtrudeSpeed = this.RapidExtrudeSpeed;
-            to.MinExtrudeSpeed = this.MinExtrudeSpeed;
-            to.OuterPerimeterSpeedX = this.OuterPerimeterSpeedX;
-            to.FanSpeedX = this.FanSpeedX;
+            this.ExtruderTempC = other.ExtruderTempC;
+            this.HeatedBedTempC = other.HeatedBedTempC;
+            this.EnableRetraction = other.EnableRetraction;
+            this.RetractDistanceMM = other.RetractDistanceMM;
+            this.MinRetractTravelLength = other.MinRetractTravelLength;
 
-            to.Shells = this.Shells;
-            to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;
-            to.OuterShellLast = this.OuterShellLast;
-            to.RoofLayers = this.RoofLayers;
-            to.FloorLayers = this.FloorLayers;
+            this.RetractSpeed = other.RetractSpeed;
+            this.ZTravelSpeed = other.ZTravelSpeed;
+            this.RapidTravelSpeed = other.RapidTravelSpeed;
+            this.CarefulExtrudeSpeed = other.CarefulExtrudeSpeed;
+            this.RapidExtrudeSpeed = other.RapidExtrudeSpeed;
+            this.MinExtrudeSpeed = other.MinExtrudeSpeed;
+            this.OuterPerimeterSpeedX = other.OuterPerimeterSpeedX;
+            this.FanSpeedX = other.FanSpeedX;
 
-            to.ShellsFillNozzleDiamStepX = this.ShellsFillNozzleDiamStepX;
-            to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
-            to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
+            this.Shells = other.Shells;
+            this.InteriorSolidRegionShells = other.InteriorSolidRegionShells;
+            this.OuterShellLast = other.OuterShellLast;
+            this.RoofLayers = other.RoofLayers;
+            this.FloorLayers = other.FloorLayers;
 
-            to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
-            to.SparseFillBorderOverlapX = this.SparseFillBorderOverlapX;
+            this.ShellsFillNozzleDiamStepX = other.ShellsFillNozzleDiamStepX;
+            this.SolidFillNozzleDiamStepX = other.SolidFillNozzleDiamStepX;
+            this.SolidFillBorderOverlapX = other.SolidFillBorderOverlapX;
 
-            to.StartLayers = this.StartLayers;
-            to.StartLayerHeightMM = this.StartLayerHeightMM;
+            this.SparseLinearInfillStepX = other.SparseLinearInfillStepX;
+            this.SparseFillBorderOverlapX = other.SparseFillBorderOverlapX;
 
-            to.GenerateSupport = this.GenerateSupport;
-            to.SupportOverhangAngleDeg = this.SupportOverhangAngleDeg;
-            to.SupportSpacingStepX = this.SupportSpacingStepX;
-            to.SupportVolumeScale = this.SupportVolumeScale;
-            to.EnableSupportShell = this.EnableSupportShell;
-            to.SupportAreaOffsetX = this.SupportAreaOffsetX;
-            to.SupportSolidSpace = this.SupportSolidSpace;
-            to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
-            to.EnableSupportReleaseOpt = this.EnableSupportReleaseOpt;
-            to.SupportReleaseGap = this.SupportReleaseGap;
-            to.SupportMinDimension = this.SupportMinDimension;
-            to.SupportMinZTips = this.SupportMinZTips;
-            to.SupportPointDiam = this.SupportPointDiam;
-            to.SupportPointSides = this.SupportPointSides;
+            this.StartLayers = other.StartLayers;
+            this.StartLayerHeightMM = other.StartLayerHeightMM;
 
-            to.EnableBridging = this.EnableBridging;
-            to.MaxBridgeWidthMM = this.MaxBridgeWidthMM;
-            to.BridgeFillNozzleDiamStepX = this.BridgeFillNozzleDiamStepX;
-            to.BridgeVolumeScale = this.BridgeVolumeScale;
-            to.BridgeExtrudeSpeedX = this.BridgeExtrudeSpeedX;
+            this.GenerateSupport = other.GenerateSupport;
+            this.SupportOverhangAngleDeg = other.SupportOverhangAngleDeg;
+            this.SupportSpacingStepX = other.SupportSpacingStepX;
+            this.SupportVolumeScale = other.SupportVolumeScale;
+            this.EnableSupportShell = other.EnableSupportShell;
+            this.SupportAreaOffsetX = other.SupportAreaOffsetX;
+            this.SupportSolidSpace = other.SupportSolidSpace;
+            this.SupportRegionJoinTolX = other.SupportRegionJoinTolX;
+            this.EnableSupportReleaseOpt = other.EnableSupportReleaseOpt;
+            this.SupportReleaseGap = other.SupportReleaseGap;
+            this.SupportMinDimension = other.SupportMinDimension;
+            this.SupportMinZTips = other.SupportMinZTips;
+            this.SupportPointDiam = other.SupportPointDiam;
+            this.SupportPointSides = other.SupportPointSides;
+
+            this.EnableBridging = other.EnableBridging;
+            this.MaxBridgeWidthMM = other.MaxBridgeWidthMM;
+            this.BridgeFillNozzleDiamStepX = other.BridgeFillNozzleDiamStepX;
+            this.BridgeVolumeScale = other.BridgeVolumeScale;
+            this.BridgeExtrudeSpeedX = other.BridgeExtrudeSpeedX;
 
 
-            to.MinLayerTime = this.MinLayerTime;
-            to.ClipSelfOverlaps = this.ClipSelfOverlaps;
-            to.SelfOverlapToleranceX = this.SelfOverlapToleranceX;
+            this.MinLayerTime = other.MinLayerTime;
+            this.ClipSelfOverlaps = other.ClipSelfOverlaps;
+            this.SelfOverlapToleranceX = other.SelfOverlapToleranceX;
 
-            to.LayerRangeFilter = this.LayerRangeFilter;
-        }
+            this.LayerRangeFilter = other.LayerRangeFilter;
 
-        //public T CloneAs2<T>() where T : ISingleMaterialFFFSettings, new()
-        //{
-        //    T to = new T();
-        //    this.CopyFieldsTo(to);
-        //    return to;
-        //}
-
-        T ISingleMaterialFFFSettings.CloneAs<T>()
-        {
-            T to = new T();
-            this.CopyFieldsTo(to);
-            return to;
-        }
+            this.FilamentCostPerKG = other.FilamentCostPerKG;
+            this.FilamentGramsPerCubicMM = other.FilamentGramsPerCubicMM;
     }
+}
 
 
 

@@ -37,13 +37,6 @@ namespace gs.info
                 configure_unknown();
         }
 
-        public override T CloneAs<T>()
-        {
-            T copy = new T();
-            this.CopyFieldsTo(copy);
-            return copy;
-        }
-
         public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
         {
             yield return new MonopriceSettings(Monoprice.Models.MP_Select_Mini_V2);

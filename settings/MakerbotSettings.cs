@@ -46,15 +46,6 @@ namespace gs.info
 
         }
 
-
-        public override T CloneAs<T>()
-        {
-            T copy = new T();
-            this.CopyFieldsTo(copy);
-            return copy;
-        }
-
-
         public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
         {
             yield return new MakerbotSettings(Makerbot.Models.Replicator2);

@@ -9,7 +9,7 @@ namespace gs
 
 	public class MakerbotAssembler : BaseDepositionAssembler
     {
-        public static BaseDepositionAssembler Factory(GCodeBuilder builder, SingleMaterialFFFSettings settings) {
+        public static BaseDepositionAssembler Factory(GCodeBuilder builder, ISingleMaterialFFFSettings settings) {
             return new MakerbotAssembler(builder, settings);
         }
 
@@ -17,7 +17,7 @@ namespace gs
 		public SingleMaterialFFFSettings Settings;
 
 
-		public MakerbotAssembler(GCodeBuilder useBuilder, SingleMaterialFFFSettings settings) : base(useBuilder, settings.Machine)
+		public MakerbotAssembler(GCodeBuilder useBuilder, ISingleMaterialFFFSettings settings) : base(useBuilder, settings.Machine)
         {
             Settings = settings as SingleMaterialFFFSettings;
 

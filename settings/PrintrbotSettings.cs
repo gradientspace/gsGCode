@@ -37,15 +37,7 @@ namespace gs.info
                 configure_unknown();
         }
 
-        public override T CloneAs<T>()
-        {
-            T copy = new T();
-            this.CopyFieldsTo(copy);
-            return copy;
-        }
-
-
-        public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
+        public static IEnumerable<ISingleMaterialFFFSettings> EnumerateDefaults()
         {
             yield return new PrintrbotSettings(Printrbot.Models.Plus);
             yield return new PrintrbotSettings(Printrbot.Models.Unknown);
@@ -144,14 +136,8 @@ namespace gs.info
             OuterPerimeterSpeedX = 0.5;
         }
 
-
-
-
-
-
-
         public BaseDepositionAssembler MakePrintrbotAssembler(
-			GCodeBuilder builder, SingleMaterialFFFSettings settings)
+			GCodeBuilder builder, ISingleMaterialFFFSettings settings)
 		{
 			var asm = new RepRapAssembler(builder, settings);
 			asm.HeaderCustomizerF = HeaderCustomF;

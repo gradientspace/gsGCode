@@ -37,14 +37,6 @@ namespace gs.info
                 configure_unknown();
         }
 
-        public override T CloneAs<T>()
-        {
-            T copy = new T();
-            this.CopyFieldsTo(copy);
-            return copy;
-        }
-
-
         public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
         {
             yield return new PrusaSettings(Prusa.Models.i3_MK3);
@@ -146,7 +138,7 @@ namespace gs.info
 
 
         public BaseDepositionAssembler MakePrusaAssembler(
-			GCodeBuilder builder, SingleMaterialFFFSettings settings)
+			GCodeBuilder builder, ISingleMaterialFFFSettings settings)
 		{
 			var asm = new RepRapAssembler(builder, settings);
             asm.HomeSequenceF = this.HomeSequence;
