@@ -54,6 +54,9 @@ namespace gs.info
             Machine.Class = MachineClass.PlasticFFFPrinter;
             Machine.BedSizeXMM = 80;
             Machine.BedSizeYMM = 80;
+            Machine.BedOriginFactorX = 0.5;
+            Machine.BedOriginFactorY = 0.5;
+
             Machine.MaxHeightMM = 55;
             Machine.NozzleDiamMM = 0.4;
             Machine.FilamentDiamMM = 1.75;

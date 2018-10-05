@@ -25,6 +25,20 @@ namespace gs
         public double BedSizeYMM = 100;
         public double MaxHeightMM = 100;
 
+        // These factors define the output coordinate system
+
+        // BedOriginFactorX:
+        // 0   : the origin is at the left of the build plate
+        // 0.5 : the origin is at the middle of the build plate
+        // 1   : the origin is at the right of the build plate
+
+        // BedOriginFactorY:
+        // 0   : the origin is at the front of the build plate
+        // 0.5 : the origin is at the middle of the build plate
+        // 1   : the origin is at the back of the build plate
+
+        public double BedOriginFactorX = 0;
+        public double BedOriginFactorY = 0;
 
         public abstract T CloneAs<T>() where T : class;
         protected virtual void CopyFieldsTo(MachineInfo to)
@@ -126,6 +140,8 @@ namespace gs
             to.BedSizeXMM = this.BedSizeXMM;
             to.BedSizeYMM = this.BedSizeYMM;
             to.MaxHeightMM = this.MaxHeightMM;
+            to.BedOriginFactorX = this.BedOriginFactorX;
+            to.BedOriginFactorY = this.BedOriginFactorY;
         }
     }
 
