@@ -551,11 +551,11 @@ namespace gs
 
             List<string> result = new List<string>
             {
-                "Total Extrusion Estimate",
+                "TOTAL EXTRUSION ESTIMATE:",
                 "    Length: " + TotalExtrusion.ToString("N2") + " mm",
                 "    Volume: " + volume.ToString("N2") + " mm^3",
-                "    Mass: " + mass.ToString("N2") + " g",
-                "    Cost: $" + cost.ToString("N2")
+                "      Mass: " + mass.ToString("N2") + " g",
+                "      Cost: $" + cost.ToString("N2")
             };
 
             return result;
