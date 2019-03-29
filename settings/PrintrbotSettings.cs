@@ -38,9 +38,10 @@ namespace gs.info
         }
 
         public override T CloneAs<T>() {
-			PrintrbotSettings copy = new PrintrbotSettings(this.ModelEnum);
-            this.CopyFieldsTo(copy);
-            return copy as T;
+
+            var clone = (PrintrbotSettings)MemberwiseClone();
+            clone.Machine = this.machineInfo.CloneAs<FFFMachineInfo>();
+            return clone as T;
         }
 
 

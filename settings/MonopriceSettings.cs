@@ -37,10 +37,11 @@ namespace gs.info
                 configure_unknown();
         }
 
-        public override T CloneAs<T>() {
-            MonopriceSettings copy = new MonopriceSettings(this.ModelEnum);
-            this.CopyFieldsTo(copy);
-            return copy as T;
+        public override T CloneAs<T>()
+        {
+            var clone = (MonopriceSettings)MemberwiseClone();
+            clone.Machine = this.machineInfo.CloneAs<FFFMachineInfo>();
+            return clone as T;
         }
 
         public static IEnumerable<SingleMaterialFFFSettings> EnumerateDefaults()
