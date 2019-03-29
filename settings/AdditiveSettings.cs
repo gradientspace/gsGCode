@@ -27,17 +27,6 @@ namespace gs
 
 
         public abstract T CloneAs<T>() where T : class;
-        protected virtual void CopyFieldsTo(MachineInfo to)
-        {
-            to.ManufacturerName = this.ManufacturerName;
-            to.ManufacturerUUID = this.ManufacturerUUID;
-            to.ModelIdentifier = this.ModelIdentifier;
-            to.ModelUUID = this.ModelUUID;
-            to.Class = this.Class;
-            to.BedSizeXMM = this.BedSizeXMM;
-            to.BedSizeYMM = this.BedSizeYMM;
-            to.MaxHeightMM = this.MaxHeightMM;
-        }
     }
 
 
@@ -93,39 +82,8 @@ namespace gs
 
         public override T CloneAs<T>()
         {
-            FFFMachineInfo fi = new FFFMachineInfo();
-            this.CopyFieldsTo(fi);
+            var fi = MemberwiseClone();
             return fi as T;
-        }
-        protected virtual void CopyFieldsTo(FFFMachineInfo to)
-        {
-            base.CopyFieldsTo(to);
-
-            to.NozzleDiamMM = this.NozzleDiamMM;
-            to.FilamentDiamMM = this.FilamentDiamMM;
-            to.MinLayerHeightMM = this.MinLayerHeightMM;
-            to.MaxHeightMM = this.MaxHeightMM;
-            to.MinExtruderTempC = this.MaxExtruderTempC;
-            to.HasHeatedBed = this.HasHeatedBed;
-            to.MinBedTempC = this.MinBedTempC;
-            to.MaxBedTempC = this.MaxBedTempC;
-            to.MaxExtrudeSpeedMMM = this.MaxExtrudeSpeedMMM;
-            to.MaxTravelSpeedMMM = this.MaxTravelSpeedMMM;
-            to.MaxZTravelSpeedMMM = this.MaxZTravelSpeedMMM;
-            to.MaxRetractSpeedMMM = this.MaxRetractSpeedMMM;
-            to.MinPointSpacingMM = this.MinPointSpacingMM;
-
-            to.EnableAutoBedLeveling = this.EnableAutoBedLeveling;
-            to.HasAutoBedLeveling = this.HasAutoBedLeveling;
-
-            to.ManufacturerName = this.ManufacturerName;
-            to.ManufacturerUUID = this.ManufacturerUUID;
-            to.ModelIdentifier = this.ModelIdentifier;
-            to.ModelUUID = this.ModelUUID;
-            to.Class = this.Class;
-            to.BedSizeXMM = this.BedSizeXMM;
-            to.BedSizeYMM = this.BedSizeYMM;
-            to.MaxHeightMM = this.MaxHeightMM;
         }
     }
 
@@ -149,11 +107,6 @@ namespace gs
         public abstract MachineInfo BaseMachine { get; set; }
 
         public abstract T CloneAs<T>() where T : class;
-        protected virtual void CopyFieldsTo(PlanarAdditiveSettings to)
-        {
-            to.Identifier = this.Identifier;
-            to.LayerHeightMM = this.LayerHeightMM;
-        }
     }
 
 
@@ -320,73 +273,14 @@ namespace gs
 
         public override T CloneAs<T>()
         {
-            SingleMaterialFFFSettings copy = new SingleMaterialFFFSettings();
-            this.CopyFieldsTo(copy);
-            return copy as T;
-        }
-        protected virtual void CopyFieldsTo(SingleMaterialFFFSettings to)
-        {
-            base.CopyFieldsTo(to);
-            to.machineInfo = this.machineInfo.CloneAs<FFFMachineInfo>();
+            var clone = (SingleMaterialFFFSettings) MemberwiseClone();
 
-            to.ExtruderTempC = this.ExtruderTempC;
-            to.HeatedBedTempC = this.HeatedBedTempC;
-            to.EnableRetraction = this.EnableRetraction;
-            to.RetractDistanceMM = this.RetractDistanceMM;
-            to.MinRetractTravelLength = this.MinRetractTravelLength;
+            // NOTE: If you add reference type members to the class, 
+            // you need to create copies here, otherwise they will be copied by reference.
+            // `string` members are okay because they are readonly.
+            clone.Machine = this.machineInfo.CloneAs<FFFMachineInfo>();
 
-            to.RetractSpeed = this.RetractSpeed;
-            to.ZTravelSpeed = this.ZTravelSpeed;
-            to.RapidTravelSpeed = this.RapidTravelSpeed;
-            to.CarefulExtrudeSpeed = this.CarefulExtrudeSpeed;
-            to.RapidExtrudeSpeed = this.RapidExtrudeSpeed;
-            to.MinExtrudeSpeed = this.MinExtrudeSpeed;
-            to.OuterPerimeterSpeedX = this.OuterPerimeterSpeedX;
-            to.FanSpeedX = this.FanSpeedX;
-
-            to.Shells = this.Shells;
-            to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;
-			to.OuterShellLast = this.OuterShellLast;
-            to.RoofLayers = this.RoofLayers;
-            to.FloorLayers = this.FloorLayers;
-
-            to.ShellsFillNozzleDiamStepX = this.ShellsFillNozzleDiamStepX;
-            to.SolidFillNozzleDiamStepX = this.SolidFillNozzleDiamStepX;
-			to.SolidFillBorderOverlapX = this.SolidFillBorderOverlapX;
-
-            to.SparseLinearInfillStepX = this.SparseLinearInfillStepX;
-            to.SparseFillBorderOverlapX = this.SparseFillBorderOverlapX;
-
-            to.StartLayers = this.StartLayers;
-            to.StartLayerHeightMM = this.StartLayerHeightMM;
-
-            to.GenerateSupport = this.GenerateSupport;
-			to.SupportOverhangAngleDeg = this.SupportOverhangAngleDeg;
-            to.SupportSpacingStepX = this.SupportSpacingStepX;
-            to.SupportVolumeScale = this.SupportVolumeScale;
-			to.EnableSupportShell = this.EnableSupportShell;
-			to.SupportAreaOffsetX = this.SupportAreaOffsetX;
-			to.SupportSolidSpace = this.SupportSolidSpace;
-			to.SupportRegionJoinTolX = this.SupportRegionJoinTolX;
-            to.EnableSupportReleaseOpt = this.EnableSupportReleaseOpt;
-            to.SupportReleaseGap = this.SupportReleaseGap;
-            to.SupportMinDimension = this.SupportMinDimension;
-            to.SupportMinZTips = this.SupportMinZTips;
-            to.SupportPointDiam = this.SupportPointDiam;
-			to.SupportPointSides = this.SupportPointSides;
-
-			to.EnableBridging = this.EnableBridging;
-			to.MaxBridgeWidthMM = this.MaxBridgeWidthMM;
-			to.BridgeFillNozzleDiamStepX = this.BridgeFillNozzleDiamStepX;
-			to.BridgeVolumeScale = this.BridgeVolumeScale;
-			to.BridgeExtrudeSpeedX = this.BridgeExtrudeSpeedX;
-
-
-            to.MinLayerTime = this.MinLayerTime;
-            to.ClipSelfOverlaps = this.ClipSelfOverlaps;
-            to.SelfOverlapToleranceX = this.SelfOverlapToleranceX;
-
-            to.LayerRangeFilter = this.LayerRangeFilter;
+            return clone as T;
         }
 
     }
@@ -404,9 +298,9 @@ namespace gs
 
         public override T CloneAs<T>()
         {
-            GenericRepRapSettings copy = new GenericRepRapSettings();
-            this.CopyFieldsTo(copy);
-            return copy as T;
+            var clone = (GenericRepRapSettings)MemberwiseClone();
+            clone.Machine = this.machineInfo.CloneAs<FFFMachineInfo>();
+            return clone as T; 
         }
         
 

@@ -38,10 +38,11 @@ namespace gs.info
         }
 
 
-        public override T CloneAs<T>() {
-            FlashforgeSettings copy = new FlashforgeSettings(this.ModelEnum);
-            this.CopyFieldsTo(copy);
-            return copy as T;
+        public override T CloneAs<T>()
+        {
+            var clone = (FlashforgeSettings)MemberwiseClone();
+            clone.Machine = this.machineInfo.CloneAs<FFFMachineInfo>();
+            return clone as T;
         }
 
 

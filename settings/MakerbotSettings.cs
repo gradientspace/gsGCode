@@ -47,10 +47,11 @@ namespace gs.info
         }
 
 
-        public override T CloneAs<T>() {
-            MakerbotSettings copy = new MakerbotSettings(this.ModelEnum);
-            this.CopyFieldsTo(copy);
-            return copy as T;
+        public override T CloneAs<T>()
+        {
+            var clone = (MakerbotSettings)MemberwiseClone();
+            clone.Machine = this.machineInfo.CloneAs<FFFMachineInfo>();
+            return clone as T;
         }
 
 
