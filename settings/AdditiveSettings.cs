@@ -220,6 +220,12 @@ namespace gs
 
         public double FanSpeedX = 1.0;                  // default fan speed, fraction of max speed (generally unknown)
 
+
+        // Settings for z-lift on rapid travel moves 
+        public bool TravelLiftEnabled { get; set; } = true;
+        public double TravelLiftHeight { get; set; } = 0.2;
+        public double TravelLiftDistanceThreshold { get; set; } = 5d;
+
         /*
          * Shells
          */
@@ -343,6 +349,10 @@ namespace gs
             to.MinExtrudeSpeed = this.MinExtrudeSpeed;
             to.OuterPerimeterSpeedX = this.OuterPerimeterSpeedX;
             to.FanSpeedX = this.FanSpeedX;
+
+            to.TravelLiftEnabled = this.TravelLiftEnabled;
+            to.TravelLiftHeight = this.TravelLiftHeight;
+            to.TravelLiftDistanceThreshold = this.TravelLiftDistanceThreshold;
 
             to.Shells = this.Shells;
             to.InteriorSolidRegionShells = this.InteriorSolidRegionShells;
